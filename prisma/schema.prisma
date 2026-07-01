@@ -198,6 +198,8 @@ model ReadingPlanProgress {
   completed   Boolean  @default(false)
   completedAt DateTime?
   notes       String?
+
+  @@unique([planId, dayNumber])
 }
 
 model DailyVerse {
