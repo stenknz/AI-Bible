@@ -28,8 +28,10 @@ model User {
   notes          Note[]
   highlights     Highlight[]
   preferences    UserPreference?
-  prayers        Prayer[]
+  prayers        PrayerRequest[]
+  prayerCategories PrayerCategory[]
   readingPlans   ReadingPlan[]
+  dailyLogs      DailyLog[]
   conversations  AIConversation[]
   playbackStates PlaybackState[]
   audioBookmarks AudioBookmark[]
@@ -122,25 +124,101 @@ model UserPreference {
   bibleVersion String @default("NASB")
 }
 
-model Prayer {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  title      String
-  content    String
-  category   String?
-  answeredAt DateTime?
-  createdAt  DateTime @default(now())
+/// Phase 5 — Personal Spiritual OS
+
+model PrayerCategory {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  prayers     PrayerRequest[]
+
+  @@unique([userId, name])
+}
+
+model PrayerRequest {
+  id           String          @id @default(cuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id])
+  title        String
+  content      String
+  categoryId   String?
+  category     PrayerCategory? @relation(fields: [categoryId], references: [id])
+  isAnswered   Boolean         @default(false)
+  answeredAt   DateTime?
+  answerNotes  String?
+  reminderAt   DateTime?
+  reminderFreq String?         // 'daily' | 'weekly' | 'custom'
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([userId, isAnswered])
+}
+
+model ReadingPlanTemplate {
+  id          String              @id @default(cuid())
+  name        String
+  description String?
+  type        String              // 'chronological' | 'thematic' | 'one-year' | 'custom'
+  days        Int
+  isPublic    Boolean             @default(false)
+  daysPlan    ReadingPlanDay[]
+  plans       ReadingPlan[]
+}
+
+model ReadingPlanDay {
+  id           String       @id @default(cuid())
+  templateId   String
+  template     ReadingPlanTemplate @relation(fields: [templateId], references: [id])
+  dayNumber    Int
+  title        String?
+  verseIds     String[]
 }
 
 model ReadingPlan {
+  id            String              @id @default(cuid())
+  userId        String
+  user          User                @relation(fields: [userId], references: [id])
+  templateId    String?
+  template      ReadingPlanTemplate? @relation(fields: [templateId], references: [id])
+  name          String
+  type          String              @default("custom")
+  startDate     DateTime
+  progress      ReadingPlanProgress[]
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+}
+
+model ReadingPlanProgress {
+  id          String   @id @default(cuid())
+  planId      String
+  plan        ReadingPlan @relation(fields: [planId], references: [id])
+  dayNumber   Int
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  notes       String?
+}
+
+model DailyVerse {
+  id          String   @id @default(cuid())
+  verseId     String
+  date        DateTime
+  devotional  String?
+  createdAt   DateTime @default(now())
+
+  @@unique([date])
+}
+
+model DailyLog {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-  name      String
-  days      Int
-  startDate DateTime
+  date      DateTime
+  content   String
   createdAt DateTime @default(now())
+
+  @@unique([userId, date])
 }
 
 model FeatureToggle {
