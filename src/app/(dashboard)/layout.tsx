@@ -10,6 +10,9 @@ const navItems = [
   { label: "Timeline", href: "/timeline" },
   { label: "Graph", href: "/graph" },
   { label: "Audio", href: "/audio" },
+  { label: "Daily", href: "/daily" },
+  { label: "Prayer", href: "/prayer" },
+  { label: "Plans", href: "/reading-plans" },
   { label: "Admin", href: "/admin" },
 ]
 
