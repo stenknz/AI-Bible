@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum Testament {
+  OLD
+  NEW
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  passwordHash   String
+  name           String?
+  role           UserRole  @default(USER)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  notes          Note[]
+  highlights     Highlight[]
+  preferences    UserPreference?
+  prayers        Prayer[]
+  readingPlans   ReadingPlan[]
+}
+
+model Translation {
+  id        String  @id @default(cuid())
+  code      String  @unique
+  name      String
+  language  String  @default("en")
+  isDefault Boolean @default(false)
+  books     Book[]
+}
+
+model Book {
+  id            String    @id @default(cuid())
+  translationId String
+  translation   Translation @relation(fields: [translationId], references: [id])
+  number        Int
+  name          String
+  testament     Testament
+  chapters      Chapter[]
+
+  @@unique([translationId, number])
+  @@index([translationId])
+}
+
+model Chapter {
+  id     String @id @default(cuid())
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id])
+  number Int
+  verses Verse[]
+
+  @@unique([bookId, number])
+  @@index([bookId])
+}
+
+model Verse {
+  id          String     @id @default(cuid())
+  chapterId   String
+  chapter     Chapter    @relation(fields: [chapterId], references: [id])
+  number      Int
+  text        String
+  isRedLetter Boolean    @default(false)
+  notes       Note[]
+  highlights  Highlight[]
+
+  @@unique([chapterId, number])
+  @@index([chapterId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  verseId   String?
+  verse     Verse?   @relation(fields: [verseId], references: [id])
+  title     String?
+  content   Json
+  tags      String[]
+  linksTo   String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([verseId])
+}
+
+model Highlight {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  verseId   String
+  verse     Verse    @relation(fields: [verseId], references: [id])
+  color     String   @default("yellow")
+  createdAt DateTime @default(now())
+
+  @@unique([userId, verseId])
+}
+
+model UserPreference {
+  id          String @id @default(cuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id])
+  theme       String @default("dark")
+  fontSize    Int    @default(16)
+  lineSpacing Float  @default(1.6)
+  columnWidth String @default("comfortable")
+  bibleVersion String @default("NASB")
+}
+
+model Prayer {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  title      String
+  content    String
+  category   String?
+  answeredAt DateTime?
+  createdAt  DateTime @default(now())
+}
+
+model ReadingPlan {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  days      Int
+  startDate DateTime
+  createdAt DateTime @default(now())
+}
+
+model FeatureToggle {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  enabled     Boolean @default(false)
+  description String?
+}
