@@ -6,6 +6,9 @@ const navItems = [
   { label: "Bible", href: "/bible" },
   { label: "Notes", href: "/notes" },
   { label: "Search", href: "/search" },
+  { label: "Maps", href: "/maps" },
+  { label: "Timeline", href: "/timeline" },
+  { label: "Graph", href: "/graph" },
   { label: "Admin", href: "/admin" },
 ]
 
