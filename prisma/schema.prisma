@@ -79,6 +79,7 @@ model Verse {
   isRedLetter Boolean    @default(false)
   notes       Note[]
   highlights  Highlight[]
+  dailyVerses DailyVerse[]
 
   @@unique([chapterId, number])
   @@index([chapterId])
@@ -205,6 +206,7 @@ model ReadingPlanProgress {
 model DailyVerse {
   id          String   @id @default(cuid())
   verseId     String
+  verse       Verse    @relation(fields: [verseId], references: [id])
   date        DateTime
   devotional  String?
   createdAt   DateTime @default(now())
