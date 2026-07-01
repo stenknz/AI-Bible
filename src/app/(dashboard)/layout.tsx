@@ -13,6 +13,7 @@ const navItems = [
   { label: "Daily", href: "/daily" },
   { label: "Prayer", href: "/prayer" },
   { label: "Plans", href: "/reading-plans" },
+  { label: "Study", href: "/study" },
   { label: "Admin", href: "/admin" },
 ]
 
