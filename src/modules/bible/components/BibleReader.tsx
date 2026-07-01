@@ -13,10 +13,21 @@ type Props = {
 }
 
 export function BibleReader({ bookNumber, chapterNumber, bookName, totalChapters, translation = "KJV" }: Props) {
-  const { chapter, loading } = useBible(bookNumber, chapterNumber, translation)
+  const { chapter, loading, error, refetch } = useBible(bookNumber, chapterNumber, translation)
 
   if (loading) {
     return <div className="p-8 text-center text-muted-foreground">Loading...</div>
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-muted-foreground">{error}</p>
+        <button onClick={refetch} className="mt-4 rounded-lg border px-3 py-1 text-sm hover:bg-muted">
+          Try again
+        </button>
+      </div>
+    )
   }
 
   if (!chapter) {
@@ -32,7 +43,7 @@ export function BibleReader({ bookNumber, chapterNumber, bookName, totalChapters
         bookName={bookName}
       />
       <div className="space-y-1">
-        {chapter.verses.map((verse) => (
+        {chapter.verses?.map((verse) => (
           <VerseDisplay key={verse.id} verse={verse} />
         ))}
       </div>
