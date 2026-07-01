@@ -77,9 +77,10 @@ model Verse {
   number      Int
   text        String
   isRedLetter Boolean    @default(false)
-  notes       Note[]
-  highlights  Highlight[]
-  dailyVerses DailyVerse[]
+  notes        Note[]
+  highlights   Highlight[]
+  dailyVerses  DailyVerse[]
+  wordMappings InterlinearMapping[]
 
   @@unique([chapterId, number])
   @@index([chapterId])
@@ -421,4 +422,69 @@ model AudioBookmark {
   position    Int
   label       String?
   createdAt   DateTime @default(now())
+}
+
+/// Phase 6 — Original Language Deep Study Tools
+
+model StrongNumber {
+  id             String  @id @default(cuid())
+  number         String  @unique
+  language       String  // 'hebrew' | 'greek'
+  lemma          String
+  transliteration String
+  definition     String
+  notes          String?
+  words          OriginalWord[]
+}
+
+model OriginalWord {
+  id             String       @id @default(cuid())
+  strongNumberId String
+  strongNumber   StrongNumber @relation(fields: [strongNumberId], references: [id])
+  text           String
+  lemma          String
+  language       String       // 'hebrew' | 'greek'
+  morphologyId   String?
+  morphology     Morphology?  @relation(fields: [morphologyId], references: [id])
+  mappings       InterlinearMapping[]
+}
+
+model Morphology {
+  id           String  @id @default(cuid())
+  partOfSpeech String
+  tense        String?
+  mood         String?
+  voice        String?
+  person       String?
+  number       String?
+  gender       String?
+  case         String?
+  state        String?
+  rawTag       String?
+  words        OriginalWord[]
+}
+
+model InterlinearMapping {
+  id              String  @id @default(cuid())
+  verseId         String
+  verse           Verse   @relation(fields: [verseId], references: [id])
+  originalWordId  String
+  originalWord    OriginalWord @relation(fields: [originalWordId], references: [id])
+  position        Int
+  translationText String?
+
+  @@index([verseId])
+}
+
+model LexicalEntry {
+  id          String  @id @default(cuid())
+  lemma       String  @unique
+  language    String
+  definition  String
+  frequency   Int?
+  root        String?
+  derivatives String[]
+  notes       String?
+  synonyms    String[]
+  antonyms    String[]
 }
