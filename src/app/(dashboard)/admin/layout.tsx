@@ -10,6 +10,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/bible-import" className="text-muted-foreground hover:text-foreground">Bible Import</Link>
           <Link href="/admin/translations" className="text-muted-foreground hover:text-foreground">Translations</Link>
           <Link href="/admin/features" className="text-muted-foreground hover:text-foreground">Features</Link>
+          <Link href="/admin/ai-config" className="text-muted-foreground hover:text-foreground">AI Config</Link>
         </nav>
       </div>
       {children}
