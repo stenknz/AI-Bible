@@ -260,12 +260,14 @@ model AIConversation {
 }
 
 model AIMessage {
-  id             String         @id @default(cuid())
+  id             String   @id @default(cuid())
   conversationId String
   conversation   AIConversation @relation(fields: [conversationId], references: [id])
   role           String
   content        String
-  createdAt      DateTime       @default(now())
+  citations      Citation[]
+  reasoningTrace ReasoningTrace?
+  createdAt      DateTime @default(now())
 
   @@index([conversationId])
 }
@@ -487,4 +489,54 @@ model LexicalEntry {
   notes       String?
   synonyms    String[]
   antonyms    String[]
+}
+
+/// Phase 7 — Full AI Knowledge System
+
+model KnowledgeSource {
+  id             String   @id @default(cuid())
+  name           String
+  sourceType     String   // 'translation' | 'lexicon' | 'commentary' | 'user_note'
+  version        String?
+  citationFormat String?
+  citations      Citation[]
+  createdAt      DateTime @default(now())
+}
+
+model Citation {
+  id            String   @id @default(cuid())
+  aimessageId   String
+  message       AIMessage @relation(fields: [aimessageId], references: [id])
+  sourceId      String
+  source        KnowledgeSource @relation(fields: [sourceId], references: [id])
+  entityId      String
+  entityType    String
+  referenceText String
+  quote         String?
+  isDirectQuote Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([aimessageId])
+  @@index([entityId, entityType])
+}
+
+model AIModelConfig {
+  id          String  @id @default(cuid())
+  taskType    String  @unique
+  provider    String
+  model       String
+  temperature Float
+  maxTokens   Int
+  isActive    Boolean @default(true)
+}
+
+model ReasoningTrace {
+  id          String   @id @default(cuid())
+  aimessageId String   @unique
+  message     AIMessage @relation(fields: [aimessageId], references: [id])
+  steps       Json
+  duration    Int
+  modelUsed   String
+  tokenUsage  Json?
+  createdAt   DateTime @default(now())
 }
