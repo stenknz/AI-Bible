@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { APP_NAME } from "@/lib/constants"
+import { AIPanel } from "@/modules/ai/components/AIPanel"
 
 const navItems = [
   { label: "Bible", href: "/bible" },
@@ -21,7 +22,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
       </aside>
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex-1 overflow-y-auto">
+        {children}
+        <AIPanel />
+      </main>
     </div>
   )
 }
