@@ -31,6 +31,8 @@ model User {
   prayers        Prayer[]
   readingPlans   ReadingPlan[]
   conversations  AIConversation[]
+  playbackStates PlaybackState[]
+  audioBookmarks AudioBookmark[]
 }
 
 model Translation {
@@ -289,4 +291,52 @@ model EntityTag {
 
   @@unique([entityId, entityType, tag])
   @@index([tag])
+}
+
+/// Phase 4 — Audio + Voice
+
+model AudioRecording {
+  id           String   @id @default(cuid())
+  entityId     String
+  entityType   String   // 'chapter' | 'verse'
+  source       String   // 'uploaded' | 'tts' | 'external'
+  url          String
+  duration     Int
+  fileSize     Int
+  format       String
+  narrator     String?
+  language     String   @default("en")
+  isDownloaded Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  playbackStates PlaybackState[]
+  bookmarks      AudioBookmark[]
+
+  @@index([entityId, entityType])
+}
+
+model PlaybackState {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  recordingId String
+  recording   AudioRecording @relation(fields: [recordingId], references: [id])
+  position    Int      @default(0)
+  speed       Float    @default(1.0)
+  volume      Float    @default(1.0)
+  isPlaying   Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, recordingId])
+}
+
+model AudioBookmark {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  recordingId String
+  recording   AudioRecording @relation(fields: [recordingId], references: [id])
+  position    Int
+  label       String?
+  createdAt   DateTime @default(now())
 }
