@@ -184,3 +184,109 @@ model AIMessage {
 
   @@index([conversationId])
 }
+
+/// Phase 3 — Maps, Timeline, Knowledge Graph
+
+model Person {
+  id             String         @id @default(cuid())
+  name           String
+  alternateNames String[]
+  description    String?
+  personType     String         // 'patriarch' | 'prophet' | 'king' | 'apostle' | 'disciple' | 'historical'
+  metadata       Json?
+  journeys       Journey[]
+}
+
+model Place {
+  id          String   @id @default(cuid())
+  name        String
+  latitude    Float?
+  longitude   Float?
+  placeType   String   // 'city' | 'region' | 'landmark' | 'wilderness'
+  regionId    String?
+  region      Region?  @relation(fields: [regionId], references: [id])
+  description String?
+  metadata    Json?
+  stops       JourneyPlace[]
+}
+
+model Region {
+  id          String   @id @default(cuid())
+  name        String
+  regionType  String   // 'province' | 'territory' | 'geographic'
+  description String?
+  places      Place[]
+}
+
+model Journey {
+  id          String         @id @default(cuid())
+  name        String
+  personId    String?
+  person      Person?        @relation(fields: [personId], references: [id])
+  description String?
+  stops       JourneyPlace[]
+}
+
+model JourneyPlace {
+  id         String  @id @default(cuid())
+  journeyId  String
+  journey    Journey @relation(fields: [journeyId], references: [id])
+  placeId    String
+  place      Place   @relation(fields: [placeId], references: [id])
+  order      Int
+  eventId    String?
+
+  @@index([journeyId])
+  @@index([placeId])
+}
+
+model Period {
+  id          String         @id @default(cuid())
+  name        String         // "Patriarchs", "Exodus", "Kings"
+  startYear   Int?
+  endYear     Int?
+  order       Int
+  description String?
+  events      TimelineEntry[]
+}
+
+model TimelineEntry {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  startYear   Int?
+  endYear     Int?
+  periodId    String?
+  period      Period?   @relation(fields: [periodId], references: [id])
+  verseIds    String[]
+  entityType  String?   // 'event' | 'person_life' | 'reign' | 'journey'
+  importance  Int       @default(5)
+  metadata    Json?
+}
+
+model EntityRelation {
+  id            String   @id @default(cuid())
+  subjectId     String
+  subjectType   String
+  predicate     String   // 'traveled_to' | 'wrote' | 'prophesied' | 'married' | 'born_in'
+  objectId      String
+  objectType    String
+  confidence    Float    @default(1.0)
+  sourceVerseId String?
+  metadata      Json?
+
+  @@index([subjectId, subjectType])
+  @@index([objectId, objectType])
+  @@index([predicate])
+  @@index([subjectType, predicate, objectType])
+}
+
+model EntityTag {
+  id         String @id @default(cuid())
+  entityId   String
+  entityType String
+  tag        String
+
+  @@unique([entityId, entityType, tag])
+  @@index([tag])
+}
