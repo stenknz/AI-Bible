@@ -30,6 +30,7 @@ model User {
   preferences    UserPreference?
   prayers        Prayer[]
   readingPlans   ReadingPlan[]
+  conversations  AIConversation[]
 }
 
 model Translation {
@@ -145,4 +146,41 @@ model FeatureToggle {
   key         String  @unique
   enabled     Boolean @default(false)
   description String?
+}
+
+model Embedding {
+  id         String   @id @default(cuid())
+  entityId   String
+  entityType String
+  text       String
+  model      String   @default("text-embedding-3-small")
+  vector     Unsupported("vector(1536)")?
+  createdAt  DateTime @default(now())
+
+  @@unique([entityType, entityId])
+  @@index([model])
+}
+
+model AIConversation {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  title     String?
+  taskType  String?
+  messages  AIMessage[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([userId])
+}
+
+model AIMessage {
+  id             String         @id @default(cuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id])
+  role           String
+  content        String
+  createdAt      DateTime       @default(now())
+
+  @@index([conversationId])
 }
