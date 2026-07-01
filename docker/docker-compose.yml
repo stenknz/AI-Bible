@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: biblehub
+      POSTGRES_USER: biblehub
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U biblehub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://biblehub:${DB_PASSWORD:-changeme}@db:5432/biblehub
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      ACTIVE_PROVIDER: ${ACTIVE_PROVIDER:-opencode-zen}
+      OPCODE_ZEN_API_KEY: ${OPCODE_ZEN_API_KEY:-}
+      OPCODE_ZEN_BASE_URL: ${OPCODE_ZEN_BASE_URL:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@biblehub.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-changeme}
+      NODE_ENV: production
+    env_file:
+      - ../.env
+
+volumes:
+  postgres_data:
