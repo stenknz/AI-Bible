@@ -123,7 +123,7 @@ export default function BibleReader({
             Ch. {chapterNumber}
           </button>
           {showChapterGrid && (
-            <div className="absolute left-0 top-full z-10 mt-1 rounded-lg border bg-background p-2 shadow-lg">
+            <div className="absolute left-0 top-full z-10 mt-1 w-[320px] rounded-lg border bg-background p-3 shadow-lg">
               <ChapterSelector
                 totalChapters={totalChapters}
                 currentChapter={chapterNumber}

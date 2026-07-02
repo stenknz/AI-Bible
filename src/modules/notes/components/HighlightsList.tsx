@@ -35,6 +35,11 @@ export function HighlightsList() {
 
   if (highlights.length === 0) return null
 
+  async function removeHighlight(verseId: string) {
+    await fetch(`/api/highlights/${verseId}`, { method: "DELETE" })
+    setHighlights((prev) => prev.filter((h) => h.verseId !== verseId))
+  }
+
   return (
     <div className="mt-8">
       <h2 className="mb-3 text-sm font-semibold">Highlights ({highlights.length})</h2>
@@ -42,15 +47,19 @@ export function HighlightsList() {
         {highlights.map((h) => (
           <div
             key={h.id}
-            className={`rounded-lg border-l-4 p-3 ${COLOR_MAP[h.color] || "bg-yellow-100 border-yellow-300"}`}
+            className={`flex items-start justify-between rounded-lg border-l-4 p-3 ${COLOR_MAP[h.color] || "bg-yellow-100 border-yellow-300"}`}
           >
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">{h.reference}</p>
+              {h.text && <p className="mt-1 text-xs text-muted-foreground truncate">{h.text}</p>}
+            </div>
             <button
-              onClick={() => h.reference && router.push(`/bible/${h.reference.replace(/[^0-9]/g, "/")}`)}
-              className="text-sm font-medium text-blue-600 hover:underline"
+              onClick={() => removeHighlight(h.verseId)}
+              className="ml-2 rounded p-1 text-xs text-red-500 hover:bg-red-50"
+              title="Remove highlight"
             >
-              {h.reference}
+              ✕
             </button>
-            {h.text && <p className="mt-1 text-xs text-muted-foreground">{h.text}</p>}
           </div>
         ))}
       </div>
