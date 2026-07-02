@@ -1,5 +1,5 @@
 export function buildVerseExplanationPrompt(verseText: string, context: string): string {
-  return `You are a Bible study assistant. Explain the following verse clearly and faithfully to Scripture.
+  return `Explain the following verse clearly and faithfully to Scripture. Be very concise (2-3 paragraphs max).
 
 ${context ? `Context:\n${context}\n` : ""}
 
@@ -7,10 +7,9 @@ Verse:
 ${verseText}
 
 Provide:
-1. The plain meaning of the verse
-2. Key themes and concepts
-3. How it fits in the broader passage
-4. A brief application
+1. The plain meaning
+2. Key themes
+3. How it fits
 
-Always cite verse references. Separate Scripture from interpretation.`
+Cite verse references. Keep it brief.`
 }

@@ -28,10 +28,16 @@ export const verseExplanationHandler: TaskHandler = {
     const provider = providerRegistry.get(getActiveProvider())
     const response = await provider.chat(
       [
-        { role: "system", content: "You are a helpful Bible study assistant. Always cite verses." },
+        {
+          role: "system",
+          content:
+            "You are a Bible study assistant focused on Christianity and the Bible. " +
+            "If asked about non-Christian topics, politely decline. " +
+            "Always cite verses. Be concise — respond in 2-3 paragraphs max.",
+        },
         { role: "user", content: prompt },
       ],
-      { model: route.model, temperature: route.temperature, maxTokens: route.maxTokens } as AIProviderConfig
+      { model: route.model, temperature: route.temperature, maxTokens: 3000 } as AIProviderConfig
     )
 
     return response.content
