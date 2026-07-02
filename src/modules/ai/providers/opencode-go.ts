@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db"
 import { decryptApiKey } from "@/modules/ai/services/secrets"
 
 const GLOBAL_TASK = "__global__"
-const DEFAULT_BASE = "https://api.opencode.ai"
+const DEFAULT_BASE = "https://opencode.ai/zen/go/v1"
 
 async function resolveApiKey(config?: AIProviderConfig): Promise<string> {
   if (config?.apiKey) return config.apiKey
