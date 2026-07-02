@@ -1,4 +1,6 @@
 import Link from "next/link"
+export const dynamic = "force-dynamic"
+
 import { prisma } from "@/lib/db"
 
 export default async function MapsPage() {

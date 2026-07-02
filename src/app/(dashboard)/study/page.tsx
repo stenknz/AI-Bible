@@ -1,4 +1,6 @@
 import { getSession } from "@/modules/auth/services/session"
+export const dynamic = "force-dynamic"
+
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
 import Link from "next/link"

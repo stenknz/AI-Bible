@@ -1,4 +1,5 @@
 import { getSession } from "@/modules/auth/services/session"
+export const dynamic = "force-dynamic"
 import { redirect } from "next/navigation"
 import { getDailyContext } from "@/modules/daily/services/daily-service"
 import Link from "next/link"

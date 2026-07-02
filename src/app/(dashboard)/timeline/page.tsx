@@ -1,4 +1,5 @@
 import { getAllEvents, getPeriods } from "@/modules/timeline/services/timeline-service"
+export const dynamic = "force-dynamic"
 import { TimelineView } from "@/modules/timeline/components/TimelineView"
 
 export default async function TimelinePage() {

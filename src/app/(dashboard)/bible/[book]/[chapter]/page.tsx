@@ -1,4 +1,5 @@
 import { getChapterCounts } from "@/modules/bible/services/bible-service"
+export const dynamic = "force-dynamic"
 import { BibleReader } from "@/modules/bible/components/BibleReader"
 
 type Props = {

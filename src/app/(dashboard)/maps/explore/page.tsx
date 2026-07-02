@@ -1,4 +1,6 @@
 import { getAllPlaces } from "@/modules/maps/services/geo-service"
+export const dynamic = "force-dynamic"
+
 import { MapView } from "@/modules/maps/components/MapView"
 
 export default async function ExploreMapPage() {

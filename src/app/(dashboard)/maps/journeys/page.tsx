@@ -1,4 +1,5 @@
 import { getAllJourneys } from "@/modules/maps/services/journey-service"
+export const dynamic = "force-dynamic"
 import Link from "next/link"
 
 export default async function JourneysPage() {

@@ -1,4 +1,6 @@
 import { getFullGraph } from "@/modules/knowledge-graph/services/graph-service"
+export const dynamic = "force-dynamic"
+
 import { GraphView } from "@/modules/knowledge-graph/components/GraphView"
 
 export default async function GraphPage() {
