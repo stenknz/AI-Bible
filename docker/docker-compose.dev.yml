@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: biblehub
+      POSTGRES_USER: biblehub
+      POSTGRES_PASSWORD: biblehub_dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U biblehub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../src:/app/src
+      - ../public:/app/public
+      - ../prisma:/app/prisma
+      - ../kjv.txt:/app/kjv.txt
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://biblehub:biblehub_dev@db:5432/biblehub
+      JWT_SECRET: dev-secret-do-not-use-in-production
+      NEXT_PUBLIC_APP_NAME: "BibleHub AI (Dev)"
+      ACTIVE_PROVIDER: mock
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD: ChangeMe123!
+      NODE_ENV: development
+
+volumes:
+  pgdata:

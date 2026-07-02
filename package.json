@@ -6,7 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma db push --force-reset && tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "dev:up": "docker compose -f docker/docker-compose.dev.yml up -d",
+    "dev:down": "docker compose -f docker/docker-compose.dev.yml down",
+    "dev:reset": "docker compose -f docker/docker-compose.dev.yml down -v && docker compose -f docker/docker-compose.dev.yml up -d",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@metaxia/scriptures": "^2.2.0",
@@ -40,6 +50,7 @@
     "prisma": "^6.6.0",
     "tailwindcss": "^4.0.0",
     "tsx": "^4.22.4",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "vitest": "^4.1.9"
   }
 }
