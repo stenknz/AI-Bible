@@ -15,12 +15,16 @@ export async function getFullGraph(): Promise<GraphData> {
     ...events.map((e) => ({ id: `event-${e.id}`, label: e.title, type: "event" as const, group: e.entityType ?? "event" })),
   ]
 
-  const links: GraphEdge[] = relations.map((r) => ({
-    id: r.id,
-    source: `${r.subjectType}-${r.subjectId}`,
-    target: `${r.objectType}-${r.objectId}`,
-    label: r.predicate,
-  }))
+  const nodeIds = new Set(nodes.map((n) => n.id))
+
+  const links: GraphEdge[] = relations
+    .map((r) => ({
+      id: r.id,
+      source: `${r.subjectType}-${r.subjectId}`,
+      target: `${r.objectType}-${r.objectId}`,
+      label: r.predicate,
+    }))
+    .filter((l) => nodeIds.has(l.source) && nodeIds.has(l.target))
 
   return { nodes, links }
 }
@@ -44,13 +48,7 @@ export async function getEntityGraph(entityType: string, entityId: string): Prom
   })
 
   const nodes: GraphNode[] = []
-  const links: GraphEdge[] = relations.map((r) => {
-    const source = `${r.subjectType}-${r.subjectId}`
-    const target = `${r.objectType}-${r.objectId}`
-    return { id: r.id, source, target, label: r.predicate }
-  })
 
-  // Fetch labels for all related entities
   const personIds = [...relatedIds].filter((id) => id.startsWith("person-")).map((id) => id.replace("person-", ""))
   const placeIds = [...relatedIds].filter((id) => id.startsWith("place-")).map((id) => id.replace("place-", ""))
   const eventIds = [...relatedIds].filter((id) => id.startsWith("event-")).map((id) => id.replace("event-", ""))
@@ -67,6 +65,17 @@ export async function getEntityGraph(entityType: string, entityId: string): Prom
     const events = await prisma.timelineEntry.findMany({ where: { id: { in: eventIds } }, select: { id: true, title: true, entityType: true } })
     nodes.push(...events.map((e) => ({ id: `event-${e.id}`, label: e.title, type: "event" as const, group: e.entityType ?? "event" })))
   }
+
+  const nodeIds = new Set(nodes.map((n) => n.id))
+
+  const links: GraphEdge[] = relations
+    .map((r) => ({
+      id: r.id,
+      source: `${r.subjectType}-${r.subjectId}`,
+      target: `${r.objectType}-${r.objectId}`,
+      label: r.predicate,
+    }))
+    .filter((l) => nodeIds.has(l.source) && nodeIds.has(l.target))
 
   return { nodes, links }
 }

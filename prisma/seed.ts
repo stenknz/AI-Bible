@@ -611,6 +611,8 @@ async function seedKnowledgeGraph() {
   const personMap = new Map(persons.map((p) => [slug(p.name), p.id]))
   const places = await prisma.place.findMany()
   const placeMap = new Map(places.map((p) => [slug(p.name), p.id]))
+  const events = await prisma.timelineEntry.findMany()
+  const eventMap = new Map(events.map((e) => [slug(e.title), e.id]))
 
   const RELATIONS = [
     ["father_of","person","Abraham","person","Isaac"],
@@ -636,8 +638,8 @@ async function seedKnowledgeGraph() {
   ]
 
   for (const [predicate, sType, sName, oType, oName] of RELATIONS) {
-    const subjectId = sType === "person" ? personMap.get(slug(sName as string)) : slug(sName as string)
-    const objectId = oType === "person" ? personMap.get(slug(oName as string)) : oType === "place" ? placeMap.get(slug(oName as string)) : slug(oName as string)
+    const subjectId = sType === "person" ? personMap.get(slug(sName as string)) : sType === "place" ? placeMap.get(slug(sName as string)) : sType === "event" ? eventMap.get(slug(sName as string)) : slug(sName as string)
+    const objectId = oType === "person" ? personMap.get(slug(oName as string)) : oType === "place" ? placeMap.get(slug(oName as string)) : oType === "event" ? eventMap.get(slug(oName as string)) : slug(oName as string)
     if (!subjectId || !objectId) continue
     await prisma.entityRelation.create({
       data: {

@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server"
 const protectedPaths = ["/bible", "/notes", "/search", "/admin"]
 const authPaths = ["/login", "/register"]
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const session = request.cookies.get("session")?.value
   const path = request.nextUrl.pathname
 
