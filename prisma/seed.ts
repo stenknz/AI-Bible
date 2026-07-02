@@ -677,7 +677,16 @@ async function seedKnowledgeGraph() {
   console.log(`  ✅ Created ${created} relations`)
 }
 
-// ─── 13. Original Languages Demo ─────────────────────────
+// ─── 13. Cross-References ────────────────────────────────
+
+async function seedCrossReferences() {
+  console.log("  🔗 Skipping cross-reference import — data not yet available")
+  // TODO: Import TSK cross-refs from https://github.com/CrossReferences-org/bible-cross-references
+  // Format: TSV with columns: book, chapter, verse, anchor, references
+  // Parse and insert into CrossReference table
+}
+
+// ─── 14. Original Languages Demo ─────────────────────────
 
 async function seedOriginalLanguages() {
   console.log("  📜 Creating original language demo data...")
@@ -849,6 +858,7 @@ async function main() {
   await seedTimeline()
   await seedBiblicalFigures()
   await seedKnowledgeGraph()
+  await seedCrossReferences()
   await seedOriginalLanguages()
   await seedFeatures()
   await seedDailyVerse(verseIdx)
