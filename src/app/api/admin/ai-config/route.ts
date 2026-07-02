@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { getSession } from "@/modules/auth/services/session"
+import { encryptApiKey } from "@/modules/ai/services/secrets"
 
 export async function GET() {
   const session = await getSession()
@@ -9,7 +10,11 @@ export async function GET() {
   }
 
   const configs = await prisma.aIModelConfig.findMany()
-  return NextResponse.json(configs)
+  const safe = configs.map((c) => ({
+    ...c,
+    apiKeyEncrypted: c.apiKeyEncrypted ? "••••••••" : null,
+  }))
+  return NextResponse.json(safe)
 }
 
 export async function PUT(request: Request) {
@@ -19,15 +24,21 @@ export async function PUT(request: Request) {
   }
 
   const body = await request.json()
+  const data: Record<string, unknown> = {
+    provider: body.provider,
+    model: body.model,
+    temperature: body.temperature,
+    maxTokens: body.maxTokens,
+    isActive: body.isActive ?? true,
+  }
+
+  if (body.apiKey !== undefined) {
+    data.apiKeyEncrypted = body.apiKey ? encryptApiKey(body.apiKey) : null
+  }
+
   const config = await prisma.aIModelConfig.upsert({
     where: { taskType: body.taskType },
-    update: {
-      provider: body.provider,
-      model: body.model,
-      temperature: body.temperature,
-      maxTokens: body.maxTokens,
-      isActive: body.isActive ?? true,
-    },
+    update: data as any,
     create: {
       taskType: body.taskType,
       provider: body.provider,
@@ -35,7 +46,11 @@ export async function PUT(request: Request) {
       temperature: body.temperature,
       maxTokens: body.maxTokens,
       isActive: body.isActive ?? true,
+      ...(body.apiKey ? { apiKeyEncrypted: encryptApiKey(body.apiKey) } : {}),
     },
   })
-  return NextResponse.json(config)
+  return NextResponse.json({
+    ...config,
+    apiKeyEncrypted: config.apiKeyEncrypted ? "••••••••" : null,
+  })
 }

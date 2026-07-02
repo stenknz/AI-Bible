@@ -521,13 +521,14 @@ model Citation {
 }
 
 model AIModelConfig {
-  id          String  @id @default(cuid())
-  taskType    String  @unique
-  provider    String
-  model       String
-  temperature Float
-  maxTokens   Int
-  isActive    Boolean @default(true)
+  id              String  @id @default(cuid())
+  taskType        String  @unique
+  provider        String
+  model           String
+  temperature     Float
+  maxTokens       Int
+  isActive        Boolean @default(true)
+  apiKeyEncrypted String? @map("api_key_encrypted")
 }
 
 model ReasoningTrace {
