@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client"
-import Database from "better-sqlite3"
+import initSqlJs from "sql.js"
 import path from "path"
 import fs from "fs"
 
@@ -46,7 +46,9 @@ async function main() {
     console.log("  Using cached copy at", GNOSIS_PATH)
   }
 
-  const db = new Database(GNOSIS_PATH)
+  const SQL = await initSqlJs()
+  const dbBuffer = fs.readFileSync(GNOSIS_PATH)
+  const db = new SQL.Database(dbBuffer)
 
   // Build verse cache
   console.log("Building verse reference cache...")
@@ -55,23 +57,41 @@ async function main() {
   })
   const osisToVerseId = new Map<string, string>()
   for (const v of allVerses) {
-    const bookAbbr = v.chapter.book.name.toLowerCase().replace(/\s/g, "").replace(/^(\d)([a-z])/, "$1$2")
-    const key = `${bookAbbr}.${v.chapter.number}.${v.number}`
+    const bn = v.chapter.book.name.toLowerCase().replace(/[^a-z0-9]/g, "")
+    const key = `${bn}.${v.chapter.number}.${v.number}`
     osisToVerseId.set(key, v.id)
   }
   console.log(`  Cached ${osisToVerseId.size} verses`)
 
+  // Pre-load OSIS refs for all verses in Gnosis
+  console.log("Loading Gnosis verse refs...")
+  const verseRows = db.exec("SELECT id, osis_ref FROM verse")
+  const cols = verseRows[0]?.columns || []
+  const idIdx = cols.indexOf("id")
+  const refIdx = cols.indexOf("osis_ref")
+  const gnosisVerses = new Map<number, string>()
+  for (const row of verseRows[0]?.values || []) {
+    gnosisVerses.set(row[idIdx] as number, row[refIdx] as string)
+  }
+  console.log(`  Loaded ${gnosisVerses.size} Gnosis verses`)
+
   // Import cross-references
   console.log("Importing cross-references...")
-  const xrefs = db.prepare("SELECT from_verse_id, to_verse_start_id, votes FROM cross_reference").all() as any[]
+  const xrefRows = db.exec("SELECT from_verse_id, to_verse_start_id, votes FROM cross_reference")
+  const xCols = xrefRows[0]?.columns || []
+  const fromIdx = xCols.indexOf("from_verse_id")
+  const toIdx = xCols.indexOf("to_verse_start_id")
+  const votesIdx = xCols.indexOf("votes")
+  const allXrefs = xrefRows[0]?.values || []
+
   let xrefInserted = 0
   let xrefSkipped = 0
-  for (const x of xrefs) {
-    const fromOsis = db.prepare("SELECT osis_ref FROM verse WHERE id = ?").get(x.from_verse_id) as any
-    const toOsis = db.prepare("SELECT osis_ref FROM verse WHERE id = ?").get(x.to_verse_start_id) as any
+  for (const x of allXrefs) {
+    const fromOsis = gnosisVerses.get(x[fromIdx] as number)
+    const toOsis = gnosisVerses.get(x[toIdx] as number)
     if (!fromOsis || !toOsis) { xrefSkipped++; continue }
-    const fromRef = parseOsisRef(fromOsis.osis_ref)
-    const toRef = parseOsisRef(toOsis.osis_ref)
+    const fromRef = parseOsisRef(fromOsis)
+    const toRef = parseOsisRef(toOsis)
     if (!fromRef || !toRef) { xrefSkipped++; continue }
     const fromId = osisToVerseId.get(osisKey(fromRef))
     const toId = osisToVerseId.get(osisKey(toRef))
@@ -79,8 +99,8 @@ async function main() {
     try {
       await prisma.crossReference.upsert({
         where: { fromVerseId_toVerseId: { fromVerseId: fromId, toVerseId: toId } },
-        update: { weight: x.votes || 1 },
-        create: { fromVerseId: fromId, toVerseId: toId, weight: x.votes || 1, source: "gnosis" },
+        update: { weight: (x[votesIdx] as number) || 1 },
+        create: { fromVerseId: fromId, toVerseId: toId, weight: (x[votesIdx] as number) || 1, source: "gnosis" },
       })
       xrefInserted++
       if (xrefInserted % 10000 === 0) console.log(`  ${xrefInserted} cross-refs inserted...`)
@@ -88,31 +108,128 @@ async function main() {
   }
   console.log(`  Inserted ${xrefInserted} cross-references (skipped ${xrefSkipped})`)
 
-  // Import places — use findFirst + update/create since Place uses cuid() id
+  // Import places
   console.log("Importing places...")
-  const places = db.prepare("SELECT slug, name, kjv_name, latitude, longitude, feature_type, feature_sub_type, modern_name FROM place WHERE latitude IS NOT NULL").all() as any[]
+  const placeRows = db.exec("SELECT slug, name, kjv_name, latitude, longitude, feature_type, feature_sub_type, modern_name FROM place WHERE latitude IS NOT NULL")
+  const pCols = placeRows[0]?.columns || []
+  const slugIdx = pCols.indexOf("slug")
+  const nameIdx = pCols.indexOf("name")
+  const kjvIdx = pCols.indexOf("kjv_name")
+  const latIdx = pCols.indexOf("latitude")
+  const lngIdx = pCols.indexOf("longitude")
+  const ftIdx = pCols.indexOf("feature_type")
+  const modernIdx = pCols.indexOf("modern_name")
+  const allPlaces = placeRows[0]?.values || []
+
   let placeInserted = 0
-  for (const p of places) {
-    const existing = await prisma.place.findFirst({ where: { name: p.kjv_name || p.name } })
+  for (const p of allPlaces) {
+    const name = (p[kjvIdx] || p[nameIdx]) as string
+    const lat = p[latIdx] as number
+    const lng = p[lngIdx] as number
+    const existing = await prisma.place.findFirst({ where: { name } })
     if (existing) {
       await prisma.place.update({
         where: { id: existing.id },
-        data: { latitude: p.latitude, longitude: p.longitude, placeType: p.feature_type || existing.placeType },
+        data: { latitude: lat, longitude: lng, placeType: (p[ftIdx] as string) || existing.placeType },
       })
     } else {
       await prisma.place.create({
         data: {
-          name: p.kjv_name || p.name,
-          latitude: p.latitude,
-          longitude: p.longitude,
-          placeType: p.feature_type || "unknown",
-          description: p.modern_name ? `Modern: ${p.modern_name}` : null,
+          name,
+          latitude: lat,
+          longitude: lng,
+          placeType: (p[ftIdx] as string) || "unknown",
+          description: p[modernIdx] ? `Modern: ${p[modernIdx]}` : null,
         },
       })
     }
     placeInserted++
   }
   console.log(`  Imported ${placeInserted} places`)
+
+  // Import person→verse links into EntityRelation
+  console.log("Importing person→verse links...")
+  const pvRows = db.exec(`
+    SELECT pv.person_id, pv.verse_id, p.slug
+    FROM person_verse pv
+    JOIN person p ON p.id = pv.person_id
+  `)
+  const pvCols = pvRows[0]?.columns || []
+  const pvPersonId = pvCols.indexOf("person_id")
+  const pvVerseId = pvCols.indexOf("verse_id")
+  const pvSlug = pvCols.indexOf("slug")
+  const allPV = pvRows[0]?.values || []
+
+  let personLinks = 0
+  let personSkipped = 0
+  for (const row of allPV) {
+    const slug = row[pvSlug] as string
+    const gnosisVerseId = row[pvVerseId] as number
+    const osisRef = gnosisVerses.get(gnosisVerseId)
+    if (!osisRef) { personSkipped++; continue }
+    const ref = parseOsisRef(osisRef)
+    if (!ref) { personSkipped++; continue }
+    const verseId = osisToVerseId.get(osisKey(ref))
+    if (!verseId) { personSkipped++; continue }
+    const existingPerson = await prisma.person.findUnique({ where: { id: slug } })
+    if (!existingPerson) { personSkipped++; continue }
+    try {
+      await prisma.entityRelation.create({
+        data: {
+          subjectId: slug,
+          subjectType: "person",
+          predicate: "mentioned_in",
+          objectId: verseId,
+          objectType: "verse",
+          sourceVerseId: verseId,
+        },
+      }).catch(() => {})
+      personLinks++
+      if (personLinks % 5000 === 0) console.log(`  ${personLinks} person links...`)
+    } catch { personSkipped++ }
+  }
+  console.log(`  Linked ${personLinks} persons to verses (skipped ${personSkipped})`)
+
+  // Import place→verse links into EntityRelation
+  console.log("Importing place→verse links...")
+  const plcVRes = db.exec(`
+    SELECT pv.place_id, pv.verse_id, p.slug
+    FROM place_verse pv
+    JOIN place p ON p.id = pv.place_id
+  `)
+  const plcVCols = plcVRes[0]?.columns || []
+  const plcVPlaceId = plcVCols.indexOf("place_id")
+  const plcVVerseId = plcVCols.indexOf("verse_id")
+  const plcVSlug = plcVCols.indexOf("slug")
+  const allPlcV = plcVRes[0]?.values || []
+
+  let placeLinks = 0
+  let placeSkipped = 0
+  for (const row of allPlcV) {
+    const slug = row[plcVSlug] as string
+    const gnosisVerseId = row[plcVVerseId] as number
+    const osisRef = gnosisVerses.get(gnosisVerseId)
+    if (!osisRef) { placeSkipped++; continue }
+    const ref = parseOsisRef(osisRef)
+    if (!ref) { placeSkipped++; continue }
+    const verseId = osisToVerseId.get(osisKey(ref))
+    if (!verseId) { placeSkipped++; continue }
+    try {
+      await prisma.entityRelation.create({
+        data: {
+          subjectId: slug,
+          subjectType: "place",
+          predicate: "mentioned_in",
+          objectId: verseId,
+          objectType: "verse",
+          sourceVerseId: verseId,
+        },
+      }).catch(() => {})
+      placeLinks++
+      if (placeLinks % 2000 === 0) console.log(`  ${placeLinks} place links...`)
+    } catch { placeSkipped++ }
+  }
+  console.log(`  Linked ${placeLinks} places to verses (skipped ${placeSkipped})`)
 
   await prisma.$disconnect()
   db.close()
