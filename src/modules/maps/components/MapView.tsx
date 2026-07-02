@@ -1,17 +1,8 @@
 "use client"
 
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet"
-import "leaflet/dist/leaflet.css"
-import L from "leaflet"
+import { useEffect, useRef, useState } from "react"
 import type { PlaceData } from "@/modules/maps/types/maps"
-
-// Fix Leaflet default icon issue
-delete (L.Icon.Default.prototype as any)._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-})
+import "leaflet/dist/leaflet.css"
 
 type Props = {
   places: PlaceData[]
@@ -21,30 +12,57 @@ type Props = {
 }
 
 export function MapView({ places, journeyPath, center = [31.5, 35], zoom = 8 }: Props) {
-  return (
-    <div className="h-[500px] w-full rounded-lg overflow-hidden border">
-      <MapContainer center={center} zoom={zoom} className="h-full w-full" scrollWheelZoom={true}>
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {places.map((place) =>
-          place.latitude && place.longitude ? (
-            <Marker key={place.id} position={[place.latitude, place.longitude]}>
-              <Popup>
-                <div className="text-sm">
-                  <p className="font-semibold">{place.name}</p>
-                  <p className="text-xs text-muted-foreground">{place.placeType}</p>
-                  {place.description && <p className="mt-1 text-xs">{place.description}</p>}
-                </div>
-              </Popup>
-            </Marker>
-          ) : null
-        )}
-        {journeyPath && journeyPath.length > 1 && (
-          <Polyline positions={journeyPath} pathOptions={{ color: "blue", weight: 3 }} />
-        )}
-      </MapContainer>
-    </div>
-  )
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [ready, setReady] = useState(false)
+  const mapRef = useRef<any>(null)
+  const markersRef = useRef<any[]>([])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    async function initMap() {
+      const L = await import("leaflet")
+
+      delete (L.Icon.Default.prototype as any)._getIconUrl
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+      })
+
+      if (!containerRef.current || mapRef.current) return
+
+      const map = L.map(containerRef.current).setView(center, zoom)
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map)
+
+      markersRef.current = places
+        .filter((p) => p.latitude && p.longitude)
+        .map((place) => {
+          const marker = L.marker([place.latitude!, place.longitude!])
+            .addTo(map)
+            .bindPopup(`<b>${place.name}</b><br/>${place.placeType}${place.description ? `<br/>${place.description}` : ""}`)
+          return marker
+        })
+
+      if (journeyPath && journeyPath.length > 1) {
+        L.polyline(journeyPath as any, { color: "blue", weight: 3 }).addTo(map)
+      }
+
+      mapRef.current = map
+      setReady(true)
+    }
+
+    initMap()
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+      }
+    }
+  }, [places, journeyPath, center, zoom])
+
+  return <div ref={containerRef} className="h-[500px] w-full rounded-lg overflow-hidden border" />
 }
