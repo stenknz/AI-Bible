@@ -42,7 +42,9 @@ services:
       DATABASE_URL: postgresql://biblehub:biblehub_dev@db:5432/biblehub
       JWT_SECRET: dev-secret-do-not-use-in-production
       NEXT_PUBLIC_APP_NAME: "BibleHub AI (Dev)"
-      ACTIVE_PROVIDER: mock
+      ACTIVE_PROVIDER: opencode-go
+      OPCODE_GO_API_KEY: ""
+      OPCODE_GO_BASE_URL: ""
       ADMIN_EMAIL: admin@example.com
       ADMIN_PASSWORD: ChangeMe123!
       NODE_ENV: development
