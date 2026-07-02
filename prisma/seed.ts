@@ -555,9 +555,12 @@ async function seedTimeline() {
     ["Revelation Written",95,null,"early-church","John receives Revelation on Patmos"],
   ]
 
+  // Clear existing entries so re-runs stay clean
+  await prisma.timelineEntry.deleteMany()
+
   const periodIdx = new Map<string, string>()
   const periods = await prisma.period.findMany()
-  for (const p of periods) periodIdx.set(p.name.toLowerCase(), p.id)
+  for (const p of periods) periodIdx.set(slug(p.name), p.id)
 
   for (const [title, year, _, entityType, desc] of EVENTS) {
     const periodId = periodIdx.get(entityType as string)
@@ -584,6 +587,8 @@ async function seedBiblicalFigures() {
     ["Jacob", "patriarch", "Father of the twelve tribes"],
     ["Joseph", "patriarch", "Sold into Egypt, rose to power"],
     ["Moses", "prophet", "Led Israel out of Egypt"],
+    ["Noah", "patriarch", "Built the ark, survived the flood"],
+    ["Samuel", "prophet", "Last judge, anointed Saul and David"],
     ["David", "king", "Second king of Israel"],
     ["Solomon", "king", "Third king of Israel, built the Temple"],
     ["Isaiah", "prophet", "Major prophet of Judah"],
@@ -606,6 +611,9 @@ async function seedBiblicalFigures() {
 async function seedKnowledgeGraph() {
   console.log("  🔗 Creating knowledge graph...")
 
+  // Clear existing relations so re-runs stay clean
+  await prisma.entityRelation.deleteMany()
+
   // Build name-to-ID maps from actual records
   const persons = await prisma.person.findMany()
   const personMap = new Map(persons.map((p) => [slug(p.name), p.id]))
@@ -615,13 +623,16 @@ async function seedKnowledgeGraph() {
   const eventMap = new Map(events.map((e) => [slug(e.title), e.id]))
 
   const RELATIONS = [
+    // ── Family ──
     ["father_of","person","Abraham","person","Isaac"],
     ["father_of","person","Isaac","person","Jacob"],
     ["father_of","person","Jacob","person","Joseph"],
     ["mother_of","person","Mary","person","Jesus"],
+    // ── Discipleship ──
     ["disciple_of","person","Peter","person","Jesus"],
     ["disciple_of","person","John","person","Jesus"],
     ["disciple_of","person","Paul","person","Jesus"],
+    // ── Travel / Geography ──
     ["wrote","person","Paul","place","Rome"],
     ["traveled_to","person","Paul","place","Damascus"],
     ["traveled_to","person","Paul","place","Athens"],
@@ -634,13 +645,24 @@ async function seedKnowledgeGraph() {
     ["traveled_to","person","Jesus","place","Bethlehem"],
     ["born_in","person","Jesus","place","Bethlehem"],
     ["raised_in","person","Jesus","place","Nazareth"],
+    // ── Prophecy (events linked to prophets) ──
     ["prophesied","event","creation","person","Isaiah"],
+    ["prophesied","event","flood","person","Noah"],
+    ["prophesied","event","exodus-from-egypt","person","Moses"],
+    ["prophesied","event","david-anointed-king","person","Samuel"],
+    ["prophesied","event","birth-of-jesus","person","Isaiah"],
+    ["prophesied","event","crucifixion","person","Isaiah"],
+    ["prophesied","event","fall-of-jerusalem","person","Jeremiah"],
   ]
 
+  let created = 0
   for (const [predicate, sType, sName, oType, oName] of RELATIONS) {
     const subjectId = sType === "person" ? personMap.get(slug(sName as string)) : sType === "place" ? placeMap.get(slug(sName as string)) : sType === "event" ? eventMap.get(slug(sName as string)) : slug(sName as string)
     const objectId = oType === "person" ? personMap.get(slug(oName as string)) : oType === "place" ? placeMap.get(slug(oName as string)) : oType === "event" ? eventMap.get(slug(oName as string)) : slug(oName as string)
-    if (!subjectId || !objectId) continue
+    if (!subjectId || !objectId) {
+      console.warn(`  ⚠️  Skipping relation ${predicate}: ${sType} '${sName}' (${subjectId ?? "not found"}) -> ${oType} '${oName}' (${objectId ?? "not found"})`)
+      continue
+    }
     await prisma.entityRelation.create({
       data: {
         subjectId,
@@ -650,7 +672,9 @@ async function seedKnowledgeGraph() {
         objectType: oType as string,
       },
     })
+    created++
   }
+  console.log(`  ✅ Created ${created} relations`)
 }
 
 // ─── 13. Original Languages Demo ─────────────────────────

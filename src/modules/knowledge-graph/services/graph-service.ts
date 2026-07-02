@@ -30,8 +30,6 @@ export async function getFullGraph(): Promise<GraphData> {
 }
 
 export async function getEntityGraph(entityType: string, entityId: string): Promise<GraphData> {
-  const prefixedId = `${entityType}-${entityId}`
-
   const relations = await prisma.entityRelation.findMany({
     where: {
       OR: [

@@ -17,17 +17,17 @@ export default function CustomTimeline({ events }: Props) {
   }
 
   return (
-    <div className="relative pl-8">
-      <div className="absolute left-[15px] top-0 bottom-0 w-0.5 bg-border" />
+    <ol className="relative pl-8" aria-label="Biblical timeline">
+      <div className="absolute left-[15px] top-0 bottom-0 w-0.5 bg-border" aria-hidden="true" />
       {events.map((event) => {
         const yearLabel = event.startYear
           ? formatYear(event.startYear) +
-            (event.endYear && event.endYear !== event.startYear ? ` – ${formatYear(event.endYear)}` : "")
+            (event.endYear != null && event.endYear !== event.startYear ? ` – ${formatYear(event.endYear)}` : "")
           : null
 
         return (
-          <div key={event.id} className="relative pb-10 last:pb-0">
-            <div className="absolute left-[-22px] top-1.5 h-3 w-3 rounded-full border-2 border-blue-500 bg-background" />
+          <li key={event.id} className="relative pb-10 last:pb-0">
+            <div className="absolute left-[-22px] top-1.5 h-3 w-3 rounded-full border-2 border-blue-500 bg-background" aria-hidden="true" />
             <div className="ml-4 rounded-lg border bg-background p-4 shadow-sm">
               {yearLabel && (
                 <span className="mb-1 inline-block rounded bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
@@ -44,9 +44,9 @@ export default function CustomTimeline({ events }: Props) {
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{event.description}</p>
               )}
             </div>
-          </div>
+          </li>
         )
       })}
-    </div>
+    </ol>
   )
 }
