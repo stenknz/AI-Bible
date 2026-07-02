@@ -101,7 +101,7 @@ export default function BibleReader({
           <select
             value={bookNumber}
             onChange={(e) => navigate(parseInt(e.target.value), 1)}
-            className="w-full rounded-lg border px-3 py-2 text-sm"
+            className="w-48 rounded-lg border px-3 py-2 text-sm"
           >
             <optgroup label="Old Testament">
               {books.filter((b) => b.testament === "OT").map((b) => (
@@ -123,7 +123,7 @@ export default function BibleReader({
             Ch. {chapterNumber}
           </button>
           {showChapterGrid && (
-            <div className="absolute left-0 top-full z-10 mt-1 w-[320px] rounded-lg border bg-background p-3 shadow-lg">
+            <div className="absolute right-0 top-full z-10 mt-1 w-[320px] max-w-[90vw] rounded-lg border bg-background p-3 shadow-lg">
               <ChapterSelector
                 totalChapters={totalChapters}
                 currentChapter={chapterNumber}
