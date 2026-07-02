@@ -1,10 +1,23 @@
-import { getFullGraph } from "@/modules/knowledge-graph/services/graph-service"
-export const dynamic = "force-dynamic"
+"use client"
 
-import { GraphView } from "@/modules/knowledge-graph/components/GraphView"
+import { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
+import type { GraphData } from "@/modules/knowledge-graph/types/graph"
 
-export default async function GraphPage() {
-  const data = await getFullGraph()
+const GraphView = dynamic(
+  () => import("@/modules/knowledge-graph/components/GraphView").then((m) => ({ default: m.GraphView })),
+  { ssr: false, loading: () => <div className="h-[600px] w-full rounded-lg border bg-muted animate-pulse" /> }
+)
+
+export default function GraphPage() {
+  const [data, setData] = useState<GraphData>({ nodes: [], links: [] })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/graph/query").then((r) => r.json()).then(setData).finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <div className="mx-auto max-w-6xl px-4 py-8"><div className="h-[600px] w-full rounded-lg border bg-muted animate-pulse" /></div>
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">

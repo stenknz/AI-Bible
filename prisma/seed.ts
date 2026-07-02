@@ -577,8 +577,41 @@ async function seedTimeline() {
 
 // ─── 12. Knowledge Graph ─────────────────────────────────
 
+async function seedBiblicalFigures() {
+  const FIGURES = [
+    ["Abraham", "patriarch", "Father of the nation of Israel"],
+    ["Isaac", "patriarch", "Son of Abraham, father of Jacob"],
+    ["Jacob", "patriarch", "Father of the twelve tribes"],
+    ["Joseph", "patriarch", "Sold into Egypt, rose to power"],
+    ["Moses", "prophet", "Led Israel out of Egypt"],
+    ["David", "king", "Second king of Israel"],
+    ["Solomon", "king", "Third king of Israel, built the Temple"],
+    ["Isaiah", "prophet", "Major prophet of Judah"],
+    ["Jeremiah", "prophet", "Prophet of the exile"],
+    ["Peter", "apostle", "Chief apostle, wrote 1-2 Peter"],
+    ["John", "apostle", "Beloved disciple, wrote John-Revelation"],
+    ["Paul", "apostle", "Apostle to the Gentiles"],
+    ["Mary", "disciple", "Mother of Jesus"],
+    ["Jesus", "historical", "Son of God, Savior"],
+  ]
+  for (const [name, type, desc] of FIGURES) {
+    await prisma.person.upsert({
+      where: { id: slug(name as string) },
+      update: {},
+      create: { id: slug(name as string), name: name as string, personType: type as string, description: desc as string },
+    })
+  }
+}
+
 async function seedKnowledgeGraph() {
   console.log("  🔗 Creating knowledge graph...")
+
+  // Build name-to-ID maps from actual records
+  const persons = await prisma.person.findMany()
+  const personMap = new Map(persons.map((p) => [slug(p.name), p.id]))
+  const places = await prisma.place.findMany()
+  const placeMap = new Map(places.map((p) => [slug(p.name), p.id]))
+
   const RELATIONS = [
     ["father_of","person","Abraham","person","Isaac"],
     ["father_of","person","Isaac","person","Jacob"],
@@ -603,9 +636,9 @@ async function seedKnowledgeGraph() {
   ]
 
   for (const [predicate, sType, sName, oType, oName] of RELATIONS) {
-    // Use slug IDs matching the prefix pattern from knowledge-graph service
-    const subjectId = slug(sName as string)
-    const objectId = slug(oName as string)
+    const subjectId = sType === "person" ? personMap.get(slug(sName as string)) : slug(sName as string)
+    const objectId = oType === "person" ? personMap.get(slug(oName as string)) : oType === "place" ? placeMap.get(slug(oName as string)) : slug(oName as string)
+    if (!subjectId || !objectId) continue
     await prisma.entityRelation.create({
       data: {
         subjectId,
@@ -788,6 +821,7 @@ async function main() {
   await seedBookmarksAndHistory(user.id, verseIdx)
   await seedMaps()
   await seedTimeline()
+  await seedBiblicalFigures()
   await seedKnowledgeGraph()
   await seedOriginalLanguages()
   await seedFeatures()

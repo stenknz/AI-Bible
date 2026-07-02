@@ -1,16 +1,30 @@
-import { getAllPlaces } from "@/modules/maps/services/geo-service"
-export const dynamic = "force-dynamic"
+"use client"
 
-import { MapView } from "@/modules/maps/components/MapView"
+import { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
+import type { PlaceData } from "@/modules/maps/types/maps"
 
-export default async function ExploreMapPage() {
-  const places = await getAllPlaces()
-  const validPlaces = places.filter((p) => p.latitude && p.longitude)
+const MapView = dynamic(
+  () => import("@/modules/maps/components/MapView").then((m) => ({ default: m.MapView })),
+  { ssr: false, loading: () => <div className="h-[500px] w-full rounded-lg border bg-muted animate-pulse" /> }
+)
+
+export default function ExploreMapPage() {
+  const [places, setPlaces] = useState<PlaceData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/maps/places").then((r) => r.json()).then((data) => {
+      setPlaces(data.filter((p: PlaceData) => p.latitude && p.longitude))
+    }).finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <div className="mx-auto max-w-5xl px-4 py-8"><div className="h-[500px] w-full rounded-lg border bg-muted animate-pulse" /></div>
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <h1 className="mb-4 text-xl font-semibold">Explore Biblical Places</h1>
-      <MapView places={validPlaces} />
+      <MapView places={places} />
     </div>
   )
 }

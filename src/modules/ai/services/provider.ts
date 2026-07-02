@@ -1,4 +1,6 @@
 import type { AIProvider } from "@/modules/ai/types/ai"
+import { OpenCodeZenProvider } from "@/modules/ai/providers/opencode-zen"
+import { MockAIProvider } from "@/modules/ai/providers/mock"
 
 class AIProviderRegistry {
   private providers: Map<string, AIProvider> = new Map()
@@ -19,3 +21,9 @@ class AIProviderRegistry {
 }
 
 export const providerRegistry = new AIProviderRegistry()
+
+// Register providers at module load time for API routes
+if (typeof window === "undefined") {
+  providerRegistry.register("opencode-zen", new OpenCodeZenProvider())
+  providerRegistry.register("mock", new MockAIProvider())
+}

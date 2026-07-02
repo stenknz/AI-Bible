@@ -26,11 +26,11 @@ export function TimelineView({ events, mode = "VERTICAL_ALTERNATING" }: Props) {
         items={items}
         mode={mode}
         theme={{
-          primary: "var(--foreground)",
-          secondary: "var(--muted)",
-          cardBgColor: "var(--background)",
-          cardDetailsColor: "var(--foreground)",
-          titleColor: "var(--muted-foreground)",
+          primary: "#3b82f6",
+          secondary: "#f5f5f5",
+          cardBgColor: "#ffffff",
+          cardDetailsColor: "#0a0a0a",
+          titleColor: "#737373",
         }}
         slideShow
         slideShowType="slide_in"

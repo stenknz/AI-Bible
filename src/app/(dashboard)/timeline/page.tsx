@@ -1,12 +1,29 @@
-import { getAllEvents, getPeriods } from "@/modules/timeline/services/timeline-service"
-export const dynamic = "force-dynamic"
-import { TimelineView } from "@/modules/timeline/components/TimelineView"
+"use client"
 
-export default async function TimelinePage() {
-  const [events, periods] = await Promise.all([
-    getAllEvents(),
-    getPeriods(),
-  ])
+import { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
+import type { TimelineEventData, PeriodData } from "@/modules/timeline/types/timeline"
+
+const TimelineView = dynamic(
+  () => import("@/modules/timeline/components/TimelineView").then((m) => ({ default: m.TimelineView })),
+  { ssr: false, loading: () => <div className="h-[400px] w-full rounded-lg border bg-muted animate-pulse" /> }
+)
+
+export default function TimelinePage() {
+  const [events, setEvents] = useState<TimelineEventData[]>([])
+  const [periods, setPeriods] = useState<PeriodData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/timeline/events").then((r) => r.json()),
+    ]).then(([evts]) => {
+      setEvents(evts)
+      setLoading(false)
+    })
+  }, [])
+
+  if (loading) return <div className="mx-auto max-w-5xl px-4 py-8"><div className="h-[400px] w-full rounded-lg border bg-muted animate-pulse" /></div>
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
