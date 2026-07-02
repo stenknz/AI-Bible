@@ -1,8 +1,20 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import type { PlaceData } from "@/modules/maps/types/maps"
 import "leaflet/dist/leaflet.css"
+import "leaflet.markercluster/dist/MarkerCluster.css"
+import "leaflet.markercluster/dist/MarkerCluster.Default.css"
+
+const TYPE_LABELS: Record<string, string> = {
+  city: "City", town: "Town", village: "Village",
+  region: "Region", mountain: "Mountain", hill: "Hill",
+  sea: "Sea", river: "River", lake: "Lake", water: "Water",
+  desert: "Desert", valley: "Valley", plain: "Plain",
+  wilderness: "Wilderness", spring: "Spring", well: "Well",
+  cave: "Cave", fort: "Fort", palace: "Palace", gate: "Gate",
+  tower: "Tower", altar: "Altar", temple: "Temple",
+}
 
 type Props = {
   places: PlaceData[]
@@ -13,15 +25,15 @@ type Props = {
 
 export function MapView({ places, journeyPath, center = [31.5, 35], zoom = 8 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [ready, setReady] = useState(false)
   const mapRef = useRef<any>(null)
-  const markersRef = useRef<any[]>([])
 
   useEffect(() => {
     if (typeof window === "undefined") return
 
     async function initMap() {
       const L = await import("leaflet")
+      const MCGMod = (await import("leaflet.markercluster")) as any
+      const MCGClass = MCGMod.default || MCGMod.MarkerClusterGroup || MCGMod
 
       delete (L.Icon.Default.prototype as any)._getIconUrl
       L.Icon.Default.mergeOptions({
@@ -37,21 +49,32 @@ export function MapView({ places, journeyPath, center = [31.5, 35], zoom = 8 }: 
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map)
 
-      markersRef.current = places
-        .filter((p) => p.latitude && p.longitude)
-        .map((place) => {
-          const marker = L.marker([place.latitude!, place.longitude!])
-            .addTo(map)
-            .bindPopup(`<b>${place.name}</b><br/>${place.placeType}${place.description ? `<br/>${place.description}` : ""}`)
-          return marker
-        })
+      const clusterGroup = new MCGClass({ chunkedLoading: true })
+
+      const valid = places.filter((p) => p.latitude && p.longitude)
+      for (const place of valid) {
+        const label = TYPE_LABELS[place.placeType] || place.placeType
+        const marker = L.marker([place.latitude!, place.longitude!])
+        marker.bindPopup(`
+          <b>${place.name}</b><br/>
+          ${label !== "unknown" ? `<em>${label}</em><br/>` : ""}
+          ${place.description ? `${place.description}` : ""}
+        `)
+        clusterGroup.addLayer(marker)
+      }
+
+      map.addLayer(clusterGroup)
 
       if (journeyPath && journeyPath.length > 1) {
-        L.polyline(journeyPath as any, { color: "blue", weight: 3 }).addTo(map)
+        L.polyline(journeyPath as any, { color: "#3b82f6", weight: 3 }).addTo(map)
+      }
+
+      if (valid.length > 0) {
+        const bounds = L.latLngBounds(valid.map((p) => [p.latitude!, p.longitude!] as [number, number]))
+        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 10 })
       }
 
       mapRef.current = map
-      setReady(true)
     }
 
     initMap()

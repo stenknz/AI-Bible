@@ -83,6 +83,7 @@ model Verse {
   wordMappings InterlinearMapping[]
   crossReferencesFrom CrossReference[] @relation("CrossReferenceFrom")
   crossReferencesTo   CrossReference[] @relation("CrossReferenceTo")
+  entityRelations     EntityRelation[]
 
   @@unique([chapterId, number])
   @@index([chapterId])
@@ -386,6 +387,7 @@ model EntityRelation {
   objectType    String
   confidence    Float    @default(1.0)
   sourceVerseId String?
+  sourceVerse   Verse?   @relation(fields: [sourceVerseId], references: [id])
   metadata      Json?
 
   @@index([subjectId, subjectType])
