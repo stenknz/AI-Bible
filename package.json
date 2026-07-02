@@ -16,7 +16,8 @@
     "dev:down": "docker compose -f docker/docker-compose.dev.yml down",
     "dev:reset": "docker compose -f docker/docker-compose.dev.yml down -v && docker compose -f docker/docker-compose.dev.yml up -d",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "import:gnosis": "tsx scripts/import-gnosis.ts"
   },
   "dependencies": {
     "@metaxia/scriptures": "^2.2.0",
@@ -42,10 +43,12 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
     "@types/bcryptjs": "^3.0.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^22.0.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "better-sqlite3": "^12.11.1",
     "prisma": "^6.6.0",
     "tailwindcss": "^4.0.0",
     "tsx": "^4.22.4",
