@@ -44,7 +44,7 @@ services:
       NEXT_PUBLIC_APP_NAME: "BibleHub AI (Dev)"
       ACTIVE_PROVIDER: opencode-go
       OPCODE_GO_API_KEY: ""
-      OPCODE_GO_BASE_URL: "https://opencode.ai/zen/go/v1"
+      OPCODE_GO_BASE_URL: ""
       ADMIN_EMAIL: admin@example.com
       ADMIN_PASSWORD: ChangeMe123!
       NODE_ENV: development
