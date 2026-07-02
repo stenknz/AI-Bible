@@ -45,12 +45,21 @@ export class OpenCodeGoProvider implements AIProvider {
       }),
     })
 
+    const rawBody = await response.text()
     if (!response.ok) {
-      const body = await response.text().catch(() => "")
-      throw new Error(`OpenCode Go API error (${response.status}): ${body || response.statusText}`)
+      throw new Error(`OpenCode Go API error (${response.status}): ${rawBody || response.statusText}`)
     }
 
-    const data = await response.json()
+    let data: any
+    try {
+      data = JSON.parse(rawBody)
+    } catch {
+      throw new Error(
+        `OpenCode Go API returned unexpected response: ${rawBody.slice(0, 200)}` +
+        `${!apiKey ? " — API key is not configured" : ""}`
+      )
+    }
+
     return {
       content: data.choices?.[0]?.message?.content || "",
       finishReason: data.choices?.[0]?.finish_reason || "stop",
@@ -81,9 +90,10 @@ export class OpenCodeGoProvider implements AIProvider {
       }),
     })
 
-    if (!response.ok) {
-      const body = await response.text().catch(() => "")
-      throw new Error(`OpenCode Go API error (${response.status}): ${body || response.statusText}`)
+    if (!response.ok || !response.headers.get("content-type")?.includes("text/event-stream")) {
+      const rawBody = await response.text().catch(() => "")
+      const hint = !apiKey ? " — API key is not configured" : ""
+      throw new Error(`OpenCode Go API error (${response.status}): ${rawBody.slice(0, 200) || response.statusText}${hint}`)
     }
 
     const reader = response.body?.getReader()

@@ -46,7 +46,8 @@ export function AIPanel() {
         setMessages((prev) => [...prev, { role: "assistant", content: data.response }])
         setConversationId(data.conversationId)
       } else {
-        setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I couldn't process that request." }])
+        const data = await res.json().catch(() => ({ error: "Sorry, I couldn't process that request." }))
+        setMessages((prev) => [...prev, { role: "assistant", content: data.error }])
       }
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "An error occurred. Please try again." }])

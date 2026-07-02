@@ -29,10 +29,16 @@ export async function POST(request: Request) {
     data: { conversationId: conversation.id, role: "user", content: message },
   })
 
-  const response = await verseExplanationHandler.handle({
-    query: message,
-    verseIds,
-  })
+  let response: string
+  try {
+    response = await verseExplanationHandler.handle({
+      query: message,
+      verseIds,
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error"
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
 
   await prisma.aIMessage.create({
     data: { conversationId: conversation.id, role: "assistant", content: response },
