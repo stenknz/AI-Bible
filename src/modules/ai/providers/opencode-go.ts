@@ -4,6 +4,18 @@ import { decryptApiKey } from "@/modules/ai/services/secrets"
 
 const GLOBAL_TASK = "__global__"
 const DEFAULT_BASE = "https://opencode.ai/zen/go"
+const FETCH_TIMEOUT = 60_000 // 60s
+
+async function fetchWithTimeout(url: string, opts: RequestInit): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT)
+  try {
+    const res = await fetch(url, { ...opts, signal: controller.signal })
+    return res
+  } finally {
+    clearTimeout(timer)
+  }
+}
 
 async function resolveApiKey(config?: AIProviderConfig): Promise<string> {
   if (config?.apiKey) return config.apiKey
@@ -31,7 +43,7 @@ export class OpenCodeGoProvider implements AIProvider {
     const baseUrl = config?.baseUrl || process.env.OPCODE_GO_BASE_URL || DEFAULT_BASE
     const model = config?.model || defaultModel
 
-    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+    const response = await fetchWithTimeout(`${baseUrl}/v1/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -75,7 +87,7 @@ export class OpenCodeGoProvider implements AIProvider {
     const baseUrl = config?.baseUrl || process.env.OPCODE_GO_BASE_URL || DEFAULT_BASE
     const model = config?.model || defaultModel
 
-    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+    const response = await fetchWithTimeout(`${baseUrl}/v1/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -118,7 +130,7 @@ export class OpenCodeGoProvider implements AIProvider {
     const apiKey = await resolveApiKey()
     const baseUrl = process.env.OPCODE_GO_BASE_URL || DEFAULT_BASE
 
-    const response = await fetch(`${baseUrl}/v1/embeddings`, {
+    const response = await fetchWithTimeout(`${baseUrl}/v1/embeddings`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
