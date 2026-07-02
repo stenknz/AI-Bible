@@ -81,6 +81,8 @@ model Verse {
   highlights   Highlight[]
   dailyVerses  DailyVerse[]
   wordMappings InterlinearMapping[]
+  crossReferencesFrom CrossReference[] @relation("CrossReferenceFrom")
+  crossReferencesTo   CrossReference[] @relation("CrossReferenceTo")
 
   @@unique([chapterId, number])
   @@index([chapterId])
@@ -99,7 +101,9 @@ model Bookmark {
 
 model CrossReference {
   fromVerseId String
+  fromVerse   Verse    @relation("CrossReferenceFrom", fields: [fromVerseId], references: [id])
   toVerseId   String
+  toVerse     Verse    @relation("CrossReferenceTo", fields: [toVerseId], references: [id])
   weight      Int      @default(1)
   source      String   @default("tsk")
 
