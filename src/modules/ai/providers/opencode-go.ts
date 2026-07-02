@@ -52,7 +52,7 @@ export class OpenCodeGoProvider implements AIProvider {
       body: JSON.stringify({
         model,
         messages,
-        max_tokens: config?.maxTokens || 2000,
+        max_tokens: config?.maxTokens || 8000,
         temperature: config?.temperature ?? 0.3,
       }),
     })
@@ -97,7 +97,7 @@ export class OpenCodeGoProvider implements AIProvider {
         model,
         messages,
         stream: true,
-        max_tokens: config?.maxTokens || 2000,
+        max_tokens: config?.maxTokens || 8000,
         temperature: config?.temperature ?? 0.3,
       }),
     })

@@ -16,13 +16,13 @@ type ModelConfig = {
 const GLOBAL_TASK = "__global__"
 
 const DEFAULT_TASKS = [
-  { taskType: "verse_explanation", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.3, maxTokens: 2000 },
-  { taskType: "passage_summary", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.3, maxTokens: 2000 },
-  { taskType: "theological_question_answering", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.4, maxTokens: 2000 },
-  { taskType: "devotional_generation", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.7, maxTokens: 2000 },
-  { taskType: "study_plan_generation", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.5, maxTokens: 2000 },
-  { taskType: "cross_reference_generation", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.2, maxTokens: 2000 },
-  { taskType: "quiz_generation", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.6, maxTokens: 2000 },
+  { taskType: "verse_explanation", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.3, maxTokens: 8000 },
+  { taskType: "passage_summary", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.3, maxTokens: 8000 },
+  { taskType: "theological_question_answering", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.4, maxTokens: 8000 },
+  { taskType: "devotional_generation", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.7, maxTokens: 8000 },
+  { taskType: "study_plan_generation", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.5, maxTokens: 8000 },
+  { taskType: "cross_reference_generation", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.2, maxTokens: 8000 },
+  { taskType: "quiz_generation", provider: "opencode-go", model: "deepseek-v4-flash", temperature: 0.6, maxTokens: 8000 },
 ]
 
 const TASK_LABELS: Record<string, string> = {
