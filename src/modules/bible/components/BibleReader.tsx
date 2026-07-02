@@ -43,32 +43,39 @@ export default function BibleReader({
   }, [bookNumber, chapterNumber, markVisited])
 
   function navigate(book: number, chapter: number) {
-    const capped = chapter > (books?.find((b) => b.number === book) ? 999 : 150) ? 1 : chapter
-    router.push(`/bible/${book}/${capped}`)
+    router.push(`/bible/${book}/${chapter}`)
   }
 
   async function handleHighlight(verseId: string, color: string) {
-    await fetch("/api/highlights", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ verseId, color }),
-    })
+    try {
+      await fetch("/api/highlights", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ verseId, color }),
+      })
+    } catch {}
   }
 
   async function handleRemoveHighlight(verseId: string) {
-    await fetch(`/api/highlights/${verseId}`, { method: "DELETE" })
+    try {
+      await fetch(`/api/highlights/${verseId}`, { method: "DELETE" })
+    } catch {}
   }
 
   async function handleBookmark(verseId: string) {
-    await fetch("/api/bookmarks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ verseId }),
-    })
+    try {
+      await fetch("/api/bookmarks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ verseId }),
+      })
+    } catch {}
   }
 
   async function handleRemoveBookmark(verseId: string) {
-    await fetch(`/api/bookmarks/${verseId}`, { method: "DELETE" })
+    try {
+      await fetch(`/api/bookmarks/${verseId}`, { method: "DELETE" })
+    } catch {}
   }
 
   function handleAddNote(verseId: string) {

@@ -14,7 +14,7 @@ export default function BottomNav({ bookNumber, chapterNumber, totalChapters, bo
 
   function goPrev() {
     if (chapterNumber > 1) onNavigate(bookNumber, chapterNumber - 1)
-    else if (bookNumber > 1) onNavigate(bookNumber - 1, 999)
+    else if (bookNumber > 1) onNavigate(bookNumber - 1, 1)
   }
 
   function goNext() {

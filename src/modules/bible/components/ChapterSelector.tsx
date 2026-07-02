@@ -17,7 +17,7 @@ export default function ChapterSelector({ totalChapters, currentChapter, onSelec
         <button
           key={ch}
           onClick={() => onSelect(ch)}
-          className={`rounded px-2 py-1 text-xs transition-colors ${
+          className={`rounded px-2 py-1 text-sm transition-colors ${
             ch === currentChapter
               ? "bg-blue-600 text-white"
               : "hover:bg-muted"
