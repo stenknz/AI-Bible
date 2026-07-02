@@ -29,6 +29,10 @@ services:
       - ../public:/app/public
       - ../prisma:/app/prisma
       - ../kjv.txt:/app/kjv.txt
+      - ../postcss.config.js:/app/postcss.config.js
+      - ../next.config.ts:/app/next.config.ts
+      - ../tailwind.config.ts:/app/tailwind.config.ts
+      - ../.env:/app/.env
       - /app/node_modules
       - /app/.next
     depends_on:
