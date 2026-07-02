@@ -1,13 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import dynamic from "next/dynamic"
+import { MapView } from "@/modules/maps/components/MapView"
 import type { PlaceData } from "@/modules/maps/types/maps"
-
-const MapView = dynamic(
-  () => import("@/modules/maps/components/MapView").then((m) => ({ default: m.MapView })),
-  { ssr: false, loading: () => <div className="h-[500px] w-full rounded-lg border bg-muted animate-pulse" /> }
-)
 
 export default function ExploreMapPage() {
   const [places, setPlaces] = useState<PlaceData[]>([])

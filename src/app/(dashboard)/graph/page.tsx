@@ -1,13 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import dynamic from "next/dynamic"
+import { GraphView } from "@/modules/knowledge-graph/components/GraphView"
 import type { GraphData } from "@/modules/knowledge-graph/types/graph"
-
-const GraphView = dynamic(
-  () => import("@/modules/knowledge-graph/components/GraphView").then((m) => ({ default: m.GraphView })),
-  { ssr: false, loading: () => <div className="h-[600px] w-full rounded-lg border bg-muted animate-pulse" /> }
-)
 
 export default function GraphPage() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] })
