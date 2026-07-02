@@ -3,7 +3,19 @@ import { prisma } from "@/lib/db"
 export async function getUserHighlights(userId: string, verseIds?: string[]) {
   const where: any = { userId }
   if (verseIds) where.verseId = { in: verseIds }
-  return prisma.highlight.findMany({ where })
+  return prisma.highlight.findMany({
+    where,
+    include: {
+      verse: {
+        include: {
+          chapter: {
+            include: { book: true },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  })
 }
 
 export async function upsertHighlight(userId: string, verseId: string, color: string) {

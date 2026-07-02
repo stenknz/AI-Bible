@@ -1,6 +1,7 @@
 "use client"
 
 import { NoteList } from "@/modules/notes/components/NoteList"
+import { HighlightsList } from "@/modules/notes/components/HighlightsList"
 import { useRouter } from "next/navigation"
 
 export default function NotesPage() {
@@ -28,6 +29,7 @@ export default function NotesPage() {
         </button>
       </div>
       <NoteList />
+      <HighlightsList />
     </div>
   )
 }

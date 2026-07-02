@@ -49,9 +49,8 @@ export default async function BibleChapterPage({ params }: Props) {
       totalChapters={totalChapters}
       initialChapter={chapterData || undefined}
       books={chapterCounts.map((b, i) => ({ id: String(i + 1), number: i + 1, name: b.name, testament: i < 39 ? "OT" : "NT" }))}
-      highlightedVerses={highlightedVerses}
-      bookmarkedVerses={bookmarkedVerses}
-      highlightedColors={highlightedColors}
+      initialHighlightColors={highlightedColors}
+      initialBookmarkedIds={bookmarkedVerses}
     />
   )
 }

@@ -6,7 +6,14 @@ export async function GET() {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const highlights = await getUserHighlights(session.userId)
-  return NextResponse.json(highlights)
+  const mapped = highlights.map((h) => ({
+    id: h.id,
+    verseId: h.verseId,
+    color: h.color,
+    reference: h.verse ? `${h.verse.chapter.book.name} ${h.verse.chapter.number}:${h.verse.number}` : null,
+    text: h.verse?.text?.slice(0, 120) ?? null,
+  }))
+  return NextResponse.json(mapped)
 }
 
 export async function PUT(request: Request) {

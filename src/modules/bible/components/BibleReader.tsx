@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useReadingProgress } from "@/modules/bible/hooks/useReadingProgress"
 import ChapterSelector from "./ChapterSelector"
@@ -14,9 +14,8 @@ type Props = {
   bookName: string
   totalChapters: number
   initialChapter?: ChapterData | null
-  highlightedVerses?: string[]
-  bookmarkedVerses?: string[]
-  highlightedColors?: Record<string, string>
+  initialHighlightColors?: Record<string, string>
+  initialBookmarkedIds?: string[]
   books?: { id: string; number: number; name: string; testament: string }[]
 }
 
@@ -26,17 +25,17 @@ export default function BibleReader({
   bookName,
   totalChapters,
   initialChapter,
-  highlightedVerses = [],
-  bookmarkedVerses = [],
-  highlightedColors = {},
+  initialHighlightColors = {},
+  initialBookmarkedIds = [],
   books,
 }: Props) {
   const router = useRouter()
   const { markVisited } = useReadingProgress()
   const [showChapterGrid, setShowChapterGrid] = useState(false)
 
-  const bookmarkSet = new Set(bookmarkedVerses)
-  const highlightMap = new Map(Object.entries(highlightedColors))
+  // Local state for immediate UI updates
+  const [highlightColors, setHighlightColors] = useState<Record<string, string>>(initialHighlightColors)
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set(initialBookmarkedIds))
 
   useEffect(() => {
     markVisited(bookNumber, chapterNumber)
@@ -46,7 +45,8 @@ export default function BibleReader({
     router.push(`/bible/${book}/${chapter}`)
   }
 
-  async function handleHighlight(verseId: string, color: string) {
+  const handleHighlight = useCallback(async (verseId: string, color: string) => {
+    setHighlightColors((prev) => ({ ...prev, [verseId]: color }))
     try {
       await fetch("/api/highlights", {
         method: "PUT",
@@ -54,15 +54,21 @@ export default function BibleReader({
         body: JSON.stringify({ verseId, color }),
       })
     } catch {}
-  }
+  }, [])
 
-  async function handleRemoveHighlight(verseId: string) {
+  const handleRemoveHighlight = useCallback(async (verseId: string) => {
+    setHighlightColors((prev) => {
+      const next = { ...prev }
+      delete next[verseId]
+      return next
+    })
     try {
       await fetch(`/api/highlights/${verseId}`, { method: "DELETE" })
     } catch {}
-  }
+  }, [])
 
-  async function handleBookmark(verseId: string) {
+  const handleBookmark = useCallback(async (verseId: string) => {
+    setBookmarkedIds((prev) => new Set(prev).add(verseId))
     try {
       await fetch("/api/bookmarks", {
         method: "POST",
@@ -70,13 +76,18 @@ export default function BibleReader({
         body: JSON.stringify({ verseId }),
       })
     } catch {}
-  }
+  }, [])
 
-  async function handleRemoveBookmark(verseId: string) {
+  const handleRemoveBookmark = useCallback(async (verseId: string) => {
+    setBookmarkedIds((prev) => {
+      const next = new Set(prev)
+      next.delete(verseId)
+      return next
+    })
     try {
       await fetch(`/api/bookmarks/${verseId}`, { method: "DELETE" })
     } catch {}
-  }
+  }, [])
 
   function handleAddNote(verseId: string) {
     router.push(`/notes/new?verseId=${verseId}`)
@@ -126,8 +137,8 @@ export default function BibleReader({
       {/* Verses */}
       <VerseDisplay
         verses={initialChapter?.verses || []}
-        highlightedVerses={highlightMap}
-        bookmarkedVerses={bookmarkSet}
+        highlightedVerses={new Map(Object.entries(highlightColors))}
+        bookmarkedVerses={bookmarkedIds}
         onHighlight={handleHighlight}
         onRemoveHighlight={handleRemoveHighlight}
         onBookmark={handleBookmark}
