@@ -18,6 +18,7 @@ const BOOKS_66 = [
 ]
 
 const GOSPELS = new Set(["Matthew", "Mark", "Luke", "John"])
+const BOOK_ALIASES: Record<string, string> = { "Psalm": "Psalms", "Song": "Song of Solomon" }
 
 const prisma = new PrismaClient()
 
@@ -62,12 +63,13 @@ async function importBible(filePath: string, code: string, name: string) {
   let totalBooks = 0, totalChapters = 0
 
   for (const [bookName, verses] of books) {
-    const bookIndex = BOOKS_66.indexOf(bookName as typeof BOOKS_66[number])
+    const normalized = BOOK_ALIASES[bookName] || bookName
+    const bookIndex = BOOKS_66.indexOf(normalized as typeof BOOKS_66[number])
     if (bookIndex === -1) { errors.push(`Unknown book: ${bookName}`); continue }
 
     const book = await prisma.book.upsert({
       where: { translationId_number: { translationId: translation.id, number: bookIndex + 1 } },
-      update: { name: bookName, testament: bookIndex < 39 ? "OLD" : "NEW" },
+      update: { name: normalized, testament: bookIndex < 39 ? "OLD" : "NEW" },
       create: { translationId: translation.id, number: bookIndex + 1, name: bookName, testament: bookIndex < 39 ? "OLD" : "NEW" },
     })
     totalBooks++

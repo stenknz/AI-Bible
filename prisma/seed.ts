@@ -30,6 +30,12 @@ const BOOKS_66 = [
   "James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation",
 ]
 
+// KJV.txt uses different book names for some books
+const BOOK_ALIASES: Record<string, string> = {
+  "Psalm": "Psalms",
+  "Song": "Song of Solomon",
+}
+
 const GOSPELS = new Set(["Matthew","Mark","Luke","John"])
 
 // ─── 1. Import KJV ───────────────────────────────────────
@@ -68,13 +74,14 @@ async function importKJV() {
 
   let totalV = 0
   for (const [bookName, verses] of books) {
-    const idx = BOOKS_66.indexOf(bookName as any)
+    const normalized = BOOK_ALIASES[bookName] || bookName
+    const idx = BOOKS_66.indexOf(normalized as any)
     if (idx === -1) { console.error(`  Unknown book: ${bookName}`); continue }
 
     const book = await prisma.book.upsert({
       where: { translationId_number: { translationId: translation.id, number: idx + 1 } },
       update: {},
-      create: { translationId: translation.id, number: idx + 1, name: bookName, testament: idx < 39 ? "OLD" : "NEW" },
+      create: { translationId: translation.id, number: idx + 1, name: normalized, testament: idx < 39 ? "OLD" : "NEW" },
     })
 
     const chapters = new Map<number, typeof verses>()
