@@ -10,18 +10,18 @@ export default async function AdminDashboardPage() {
   ])
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
-      <div className="rounded-lg border p-4">
+    <div className="grid gap-4 sm:grid-cols-3 animate-fade-in">
+      <div className="rounded-xl bg-card p-6 shadow-sm">
         <p className="text-sm text-muted-foreground">Translations</p>
-        <p className="text-2xl font-semibold">{translationCount}</p>
+        <p className="mt-1 text-3xl font-bold text-foreground">{translationCount}</p>
       </div>
-      <div className="rounded-lg border p-4">
+      <div className="rounded-xl bg-card p-6 shadow-sm">
         <p className="text-sm text-muted-foreground">Users</p>
-        <p className="text-2xl font-semibold">{userCount}</p>
+        <p className="mt-1 text-3xl font-bold text-foreground">{userCount}</p>
       </div>
-      <div className="rounded-lg border p-4">
+      <div className="rounded-xl bg-card p-6 shadow-sm">
         <p className="text-sm text-muted-foreground">Verses</p>
-        <p className="text-2xl font-semibold">{verseCount}</p>
+        <p className="mt-1 text-3xl font-bold text-foreground">{verseCount}</p>
       </div>
     </div>
   )

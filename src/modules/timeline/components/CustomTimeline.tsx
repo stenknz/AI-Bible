@@ -38,11 +38,15 @@ export default function CustomTimeline({ events }: Props) {
   }, [events])
 
   if (events.length === 0) {
-    return <p className="py-8 text-center text-sm text-muted-foreground">No timeline events loaded yet.</p>
+    return (
+      <div className="rounded-xl bg-card p-8 text-center shadow-sm">
+        <p className="text-sm text-muted-foreground">No timeline events loaded yet.</p>
+      </div>
+    )
   }
 
   return (
-    <ol className="relative pl-8" aria-label="Biblical timeline">
+    <ol className="relative pl-8 animate-fade-in" aria-label="Biblical timeline">
       <div className="absolute left-[15px] top-0 bottom-0 w-0.5 bg-border" aria-hidden="true" />
       {events.map((event) => {
         const yearLabel = event.startYear
@@ -54,11 +58,11 @@ export default function CustomTimeline({ events }: Props) {
         const imgSrc = imageForEvent(event, imgIdx)
 
         return (
-          <li key={event.id} className="relative pb-10 last:pb-0">
-            <div className="absolute left-[-22px] top-1.5 h-3 w-3 rounded-full border-2 border-blue-500 bg-background" aria-hidden="true" />
-            <div className="ml-4 rounded-lg border bg-background shadow-sm">
+          <li key={event.id} className="relative pb-12 last:pb-0">
+            <div className="absolute left-[-23px] top-1.5 h-3.5 w-3.5 rounded-full border-2 border-secondary bg-background shadow-sm" aria-hidden="true" />
+            <div className="ml-4 rounded-2xl bg-card shadow-sm overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
               {imgSrc && (
-                <div className="relative h-40 w-full overflow-hidden rounded-t-lg">
+                <div className="relative h-48 w-full overflow-hidden">
                   <img
                     src={imgSrc}
                     alt={`${event.title}`}
@@ -67,13 +71,13 @@ export default function CustomTimeline({ events }: Props) {
                   />
                 </div>
               )}
-              <div className="p-4">
+              <div className="p-5">
                 {yearLabel && (
-                  <span className="mb-1 inline-block rounded bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                  <span className="inline-flex items-center rounded-full bg-secondary/10 px-3 py-1 text-xs font-medium text-secondary">
                     {yearLabel}
                   </span>
                 )}
-                <h3 className="text-base font-semibold">{event.title}</h3>
+                <h3 className="mt-3 text-base font-semibold tracking-tight text-foreground">{event.title}</h3>
                 {event.periodName && (
                   <span className="mt-0.5 inline-block text-xs font-medium text-muted-foreground">
                     {event.periodName}

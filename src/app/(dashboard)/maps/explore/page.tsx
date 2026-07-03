@@ -8,9 +8,11 @@ export default async function ExploreMapPage() {
   const validPlaces = places.filter((p) => p.latitude && p.longitude)
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="mb-4 text-xl font-semibold">Explore Biblical Places</h1>
-      <MapView places={validPlaces} />
+    <div className="mx-auto max-w-5xl px-4 py-8 animate-fade-in">
+      <h1 className="mb-6 text-xl font-semibold text-foreground">Explore Biblical Places</h1>
+      <div className="rounded-xl bg-card p-6 shadow-sm">
+        <MapView places={validPlaces} />
+      </div>
     </div>
   )
 }

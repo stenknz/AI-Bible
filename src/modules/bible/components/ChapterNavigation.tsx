@@ -34,27 +34,29 @@ export function ChapterNavigation({ bookNumber, chapterNumber, totalChapters, bo
   }, [bookNumber, chapterNumber, totalChapters, goTo])
 
   return (
-    <div className="mb-6 flex items-center justify-between">
+    <div className="mb-8 flex items-center justify-between px-4">
       <div>
-        <h1 className="text-xl font-semibold">{bookName} {chapterNumber}</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">{bookName} {chapterNumber}</h1>
       </div>
       <div className="flex items-center gap-2">
         <button
           onClick={() => goTo(bookNumber, chapterNumber - 1)}
           disabled={chapterNumber <= 1}
-          className="rounded-lg border px-3 py-1 text-sm disabled:opacity-30"
+          className="rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground font-medium hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          ← Prev
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 inline-block mr-1.5 -mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Prev
         </button>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground/60 font-medium">
           {chapterNumber} / {totalChapters}
         </span>
         <button
           onClick={() => goTo(bookNumber, chapterNumber + 1)}
           disabled={chapterNumber >= totalChapters}
-          className="rounded-lg border px-3 py-1 text-sm disabled:opacity-30"
+          className="rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground font-medium hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          Next →
+          Next
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 inline-block ml-1.5 -mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>
     </div>

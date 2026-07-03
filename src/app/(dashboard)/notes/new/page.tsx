@@ -11,7 +11,6 @@ export default function NewNotePage() {
   const [verseText, setVerseText] = useState("")
   const [verseRef, setVerseRef] = useState("")
   const [saving, setSaving] = useState(false)
-  const [noteId, setNoteId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!verseId) return
@@ -21,7 +20,7 @@ export default function NewNotePage() {
         setVerseText(data.text || "")
         setVerseRef(data.reference || "")
       })
-      .catch(() => {})
+      .catch(() => console.error("Failed to load verse data"))
   }, [verseId])
 
   async function handleSave(content: any) {
@@ -37,25 +36,25 @@ export default function NewNotePage() {
     })
     if (res.ok) {
       const note = await res.json()
-      setNoteId(note.id)
       router.push(`/notes/${note.id}`)
     }
     setSaving(false)
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <button onClick={() => router.back()} className="mb-4 text-sm text-muted-foreground hover:text-foreground">
-        ← Back
+    <div className="mx-auto max-w-2xl px-4 py-8 animate-fade-in">
+      <button onClick={() => router.back()} className="mb-4 flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground">
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+        Back
       </button>
       {verseRef && (
-        <div className="mb-4 rounded-lg border-l-4 border-blue-500 bg-blue-50 px-4 py-3">
-          <p className="text-sm font-medium text-blue-800">{verseRef}</p>
-          {verseText && <p className="mt-1 text-sm text-blue-700">{verseText}</p>}
+        <div className="mb-6 rounded-xl border-l-4 border-secondary bg-muted/50 px-5 py-4">
+          <p className="text-sm font-medium text-secondary">{verseRef}</p>
+          {verseText && <p className="mt-1 text-sm text-muted-foreground">{verseText}</p>}
         </div>
       )}
       <NoteEditor onSave={handleSave} placeholder="Write your note about this verse..." />
-      <div className="mt-4 flex justify-end">
+      <div className="mt-6 flex justify-end">
         <button
           onClick={() => {
             const editorEl = document.querySelector(".ProseMirror")
@@ -63,8 +62,9 @@ export default function NewNotePage() {
             handleSave(content)
           }}
           disabled={saving}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-lg bg-secondary px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary/90 disabled:opacity-50"
         >
+          <svg className="-ml-1 mr-1.5 inline h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 12.75l6 6 9-13.5"/></svg>
           {saving ? "Saving..." : "Save Note"}
         </button>
       </div>

@@ -12,15 +12,15 @@ export default function ChapterSelector({ totalChapters, currentChapter, onSelec
   const chapters = useMemo(() => Array.from({ length: totalChapters }, (_, i) => i + 1), [totalChapters])
 
   return (
-    <div className="flex max-h-[360px] flex-wrap gap-1.5 overflow-y-auto">
+    <div className="flex max-h-[360px] flex-wrap gap-2 overflow-y-auto p-1">
       {chapters.map((ch) => (
         <button
           key={ch}
           onClick={() => onSelect(ch)}
-          className={`flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors ${
+          className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium transition-all ${
             ch === currentChapter
-              ? "bg-blue-600 text-white"
-              : "hover:bg-muted text-foreground"
+              ? "bg-secondary text-white shadow-sm"
+              : "hover:bg-muted text-foreground hover:shadow-sm"
           }`}
         >
           {ch}

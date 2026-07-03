@@ -68,7 +68,7 @@ export default function GraphView({ data }: Props) {
         const data = await res.json()
         setVerseRefs(data.verses || [])
       }
-    } catch {}
+    } catch (e) { console.error("Failed to load verse refs:", e) }
     setLoadingVerse(false)
   }, [])
 

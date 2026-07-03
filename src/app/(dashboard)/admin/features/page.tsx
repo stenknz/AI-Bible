@@ -23,18 +23,18 @@ export default function FeaturesPage() {
   }
 
   return (
-    <div>
-      <h2 className="mb-4 text-lg font-medium">Feature Toggles</h2>
-      <div className="space-y-2">
+    <div className="animate-fade-in">
+      <h2 className="mb-6 text-lg font-medium text-foreground">Feature Toggles</h2>
+      <div className="space-y-3">
         {toggles.map((t) => (
-          <div key={t.key} className="flex items-center justify-between rounded-lg border p-3">
-            <div>
-              <p className="font-medium">{t.key}</p>
-              {t.description && <p className="text-sm text-muted-foreground">{t.description}</p>}
+          <div key={t.key} className="flex items-center justify-between rounded-xl bg-card p-5 shadow-sm">
+            <div className="flex-1">
+              <p className="font-medium text-foreground">{t.key}</p>
+              {t.description && <p className="mt-0.5 text-sm text-muted-foreground">{t.description}</p>}
             </div>
             <button
               onClick={() => toggle(t.key, !t.enabled)}
-              className={`rounded-lg px-3 py-1 text-sm ${t.enabled ? "bg-green-600 text-white" : "bg-muted text-muted-foreground"}`}
+              className={`ml-4 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${t.enabled ? "bg-secondary text-white" : "bg-muted text-muted-foreground hover:bg-secondary/20"}`}
             >
               {t.enabled ? "ON" : "OFF"}
             </button>

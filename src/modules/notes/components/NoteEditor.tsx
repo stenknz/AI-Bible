@@ -25,7 +25,7 @@ export function NoteEditor({ initialContent, onSave, placeholder = "Write your n
   })
 
   return (
-    <div className="space-y-3">
+    <div className="rounded-xl border bg-card p-5 shadow-sm">
       <EditorContent editor={editor} />
     </div>
   )

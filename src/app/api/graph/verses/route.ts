@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
+export async function GET(_request: Request) {
+  const { searchParams } = new URL(_request.url)
   const type = searchParams.get("type")
   const id = searchParams.get("id")
 
@@ -10,14 +10,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "type and id required" }, { status: 400 })
   }
 
-  // Find verse references from EntityRelation
-  const prefixedId = `${type}-${id}`
   const relations = await prisma.entityRelation.findMany({
     where: {
-      OR: [
-        { subjectId: id, subjectType: type, predicate: "mentioned_in" },
-        { objectId: id, objectType: type, predicate: "mentioned_in" },
-      ],
+      subjectId: id,
+      subjectType: type,
+      predicate: "mentioned_in",
     },
     include: {
       sourceVerse: {

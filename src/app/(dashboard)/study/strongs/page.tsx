@@ -25,18 +25,18 @@ export default function StrongsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-xl font-semibold">Strong's Concordance</h1>
+    <div className="mx-auto max-w-2xl px-4 py-8 animate-fade-in">
+      <h1 className="mb-8 text-2xl font-semibold tracking-tight text-foreground">Strong's Concordance</h1>
 
-      <form onSubmit={handleSearch} className="mb-6 flex gap-2">
+      <form onSubmit={handleSearch} className="mb-8 flex gap-3">
         <input
           type="text"
           value={number}
           onChange={(e) => setNumber(e.target.value)}
           placeholder="e.g., H7225 or G3779"
-          className="flex-1 rounded-lg border px-3 py-2 text-sm"
+          className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
         />
-        <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
+        <button type="submit" className="rounded-xl bg-secondary px-6 py-3 text-sm font-medium text-white shadow-sm transition-colors duration-200 hover:bg-secondary/90">
           Search
         </button>
       </form>
@@ -45,7 +45,7 @@ export default function StrongsPage() {
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       {entry && (
-        <div className="rounded-lg border p-4">
+        <div className="rounded-xl bg-card p-6 shadow-sm animate-slide-up">
           <p className="text-2xl font-semibold">{entry.number}</p>
           <p className="text-lg text-muted-foreground" dir={entry.language === "hebrew" ? "rtl" : "ltr"}>
             {entry.transliteration}

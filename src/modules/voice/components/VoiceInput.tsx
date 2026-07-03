@@ -52,7 +52,7 @@ export function VoiceInput({ onResult, onCommand }: Props) {
 
   if (!supported) {
     return (
-      <div className="rounded-lg border p-3 text-center text-sm text-muted-foreground">
+      <div className="rounded-xl border border-border bg-card p-4 text-center text-sm text-muted-foreground shadow-sm">
         Speech recognition is not available in this browser.
       </div>
     )
@@ -62,8 +62,8 @@ export function VoiceInput({ onResult, onCommand }: Props) {
     <div className="flex flex-col items-center gap-2">
       <button
         onClick={toggleListening}
-        className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
-          listening ? "bg-red-500 text-white animate-pulse" : "bg-blue-600 text-white hover:bg-blue-700"
+        className={`flex h-14 w-14 items-center justify-center rounded-full shadow-sm transition-all duration-200 ${
+          listening ? "bg-red-500 text-white animate-pulse scale-110" : "bg-secondary text-white hover:bg-secondary/90 hover:scale-105"
         }`}
         title={listening ? "Stop listening" : "Start voice input"}
       >
@@ -71,9 +71,9 @@ export function VoiceInput({ onResult, onCommand }: Props) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
         </svg>
       </button>
-      {listening && <p className="text-xs text-blue-500 animate-pulse">Listening...</p>}
+      {listening && <p className="text-xs text-secondary animate-pulse">Listening...</p>}
       {transcript && (
-        <p className="rounded-lg bg-muted p-2 text-sm max-w-md text-center">{transcript}</p>
+        <p className="rounded-xl bg-card p-3 text-sm max-w-md text-center shadow-sm">{transcript}</p>
       )}
     </div>
   )

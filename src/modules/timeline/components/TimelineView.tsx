@@ -8,5 +8,9 @@ type Props = {
 }
 
 export default function TimelineView({ events }: Props) {
-  return <CustomTimeline events={events} />
+  return (
+    <div className="animate-slide-up">
+      <CustomTimeline events={events} />
+    </div>
+  )
 }

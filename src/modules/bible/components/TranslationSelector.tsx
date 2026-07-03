@@ -16,14 +16,14 @@ export default function TranslationSelector({ current, onChange }: Props) {
     fetch("/api/bible/translations")
       .then((r) => r.json())
       .then(setTranslations)
-      .catch(() => {})
+      .catch(() => console.error("Failed to load translations"))
   }, [])
 
   return (
     <select
       value={current}
       onChange={(e) => onChange(e.target.value)}
-      className="rounded-lg border px-2 py-1 text-xs"
+      className="rounded-xl border border-border bg-card px-3 py-1.5 text-xs text-foreground transition-all cursor-pointer focus:ring-2 focus:ring-secondary/20 focus:border-secondary appearance-none"
     >
       {translations.map((t) => (
         <option key={t.code} value={t.code}>{t.name}</option>

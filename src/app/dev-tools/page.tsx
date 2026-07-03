@@ -28,7 +28,7 @@ export default function DevToolsPage() {
     try {
       const res = await fetch("/api/dev/status", { method: "POST" })
       setStatus(await res.json())
-    } catch {}
+    } catch (e) { console.error("Failed to fetch status:", e) }
   }
 
   useEffect(() => { fetchStatus() }, [])

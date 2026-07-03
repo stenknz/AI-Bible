@@ -33,38 +33,41 @@ export function NoteList() {
 
   return (
     <div className="space-y-4">
-      <input
-        type="text"
-        placeholder="Search notes..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full rounded-lg border px-3 py-2 text-sm"
-      />
+      <div className="relative">
+        <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+        <input
+          type="text"
+          placeholder="Search notes..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full rounded-xl border border-border bg-background py-2 pl-10 pr-3 text-sm focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
+        />
+      </div>
       <div className="space-y-2">
         {filtered.map((note) => (
-          <div key={note.id} className="group flex items-start rounded-lg border p-3">
-            <Link href={`/notes/${note.id}`} className="min-w-0 flex-1 hover:bg-muted">
+          <div key={note.id} className="group flex items-start rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+            <Link href={`/notes/${note.id}`} className="min-w-0 flex-1">
               <p className="font-medium">{note.title || "Untitled"}</p>
               {note.verse && (
-                <p className="text-xs text-muted-foreground">
+                <p className="mt-0.5 text-xs text-secondary">
                   {note.verse.chapter.book.name} {note.verse.chapter.number}:{note.verse.number}
                 </p>
               )}
               {note.tags.length > 0 && (
-                <div className="mt-1 flex flex-wrap gap-1">
+                <div className="mt-2 flex flex-wrap gap-1">
                   {note.tags.map((tag) => (
-                    <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-xs">{tag}</span>
+                    <span key={tag} className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{tag}</span>
                   ))}
                 </div>
               )}
-              <p className="mt-1 text-xs text-muted-foreground">{new Date(note.updatedAt).toLocaleDateString()}</p>
+              <p className="mt-2 text-xs text-muted-foreground">{new Date(note.updatedAt).toLocaleDateString()}</p>
             </Link>
             <button
               onClick={() => deleteNote(note.id)}
-              className="ml-2 rounded p-1 text-xs text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-50"
+              className="ml-2 rounded-lg p-1.5 text-red-400 opacity-0 transition-opacity hover:bg-red-50 group-hover:opacity-100"
               title="Delete note"
             >
-              ✕
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
         ))}

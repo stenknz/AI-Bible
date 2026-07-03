@@ -11,7 +11,7 @@ export default function BookSelector({ books, currentBook, onSelect }: Props) {
     <select
       value={currentBook}
       onChange={(e) => onSelect(parseInt(e.target.value))}
-      className="w-full rounded-lg border px-3 py-2 text-sm"
+      className="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground transition-all cursor-pointer focus:ring-2 focus:ring-secondary/20 focus:border-secondary appearance-none"
     >
       <optgroup label="Old Testament">
         {books.filter((b) => b.testament === "OT").map((b) => (

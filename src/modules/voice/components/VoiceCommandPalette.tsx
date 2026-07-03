@@ -40,16 +40,16 @@ export function VoiceCommandPalette() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex h-10 w-10 items-center justify-center rounded-lg border hover:bg-muted"
+        className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary text-white shadow-sm transition-colors duration-200 hover:bg-secondary/90"
         title="Voice commands"
       >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
         </svg>
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-lg border bg-background p-4 shadow-lg">
+        <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-border bg-card p-5 shadow-lg">
           <h3 className="mb-3 text-sm font-semibold">Voice Commands</h3>
           <VoiceInput onResult={handleResult} onCommand={handleCommand} />
           <div className="mt-3 space-y-1 text-xs text-muted-foreground">
@@ -59,7 +59,7 @@ export function VoiceCommandPalette() {
             <p>Say: <span className="font-mono">&quot;pray for peace&quot;</span></p>
           </div>
           {feedback && (
-            <p className="mt-2 text-xs text-blue-500">{feedback}</p>
+            <p className="mt-2 text-xs text-secondary">{feedback}</p>
           )}
         </div>
       )}

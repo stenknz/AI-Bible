@@ -58,36 +58,36 @@ export default function PrayerPage() {
   })
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto max-w-2xl px-4 py-8 animate-fade-in">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Prayer Journal</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Prayer Journal</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="rounded-lg bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+          className="rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary/90"
         >
           {showForm ? "Cancel" : "New Prayer"}
         </button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-6 space-y-3 rounded-lg border p-4">
+        <form onSubmit={handleSubmit} className="mb-6 space-y-4 rounded-xl border bg-card p-6 shadow-sm">
           <input
             type="text"
             placeholder="Prayer title..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-lg border px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
             required
           />
           <textarea
             placeholder="Write your prayer..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full rounded-lg border px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
             rows={4}
             required
           />
-          <button type="submit" className="rounded-lg bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700">
+          <button type="submit" className="rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary/90">
             Save Prayer
           </button>
         </form>
@@ -98,7 +98,7 @@ export default function PrayerPage() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`rounded-full px-3 py-1 text-xs ${filter === f ? "bg-blue-600 text-white" : "bg-muted text-muted-foreground"}`}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filter === f ? "bg-secondary text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
@@ -107,23 +107,24 @@ export default function PrayerPage() {
 
       <div className="space-y-3">
         {filtered.map((prayer) => (
-          <div key={prayer.id} className={`rounded-lg border p-4 ${prayer.isAnswered ? "opacity-60" : ""}`}>
+          <div key={prayer.id} className={`animate-slide-up rounded-xl border bg-card p-5 shadow-sm ${prayer.isAnswered ? "border-l-4 border-l-green-400" : ""}`}>
             <div className="flex items-start justify-between">
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="font-medium">{prayer.title}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{prayer.content}</p>
               </div>
               {!prayer.isAnswered && (
                 <button
                   onClick={() => markAnswered(prayer.id)}
-                  className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300"
+                  className="ml-3 shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted"
                 >
                   Mark Answered
                 </button>
               )}
             </div>
             {prayer.isAnswered && prayer.answeredAt && (
-              <p className="mt-2 text-xs text-green-600 dark:text-green-400">
+              <p className="mt-3 text-xs font-medium text-green-600">
+                <svg className="-ml-0.5 mr-1 inline h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 12.75l6 6 9-13.5"/></svg>
                 Answered {new Date(prayer.answeredAt).toLocaleDateString()}
                 {prayer.answerNotes && ` — ${prayer.answerNotes}`}
               </p>
@@ -132,7 +133,7 @@ export default function PrayerPage() {
           </div>
         ))}
         {filtered.length === 0 && (
-          <p className="text-center text-sm text-muted-foreground">No prayers yet.</p>
+          <p className="py-12 text-center text-sm text-muted-foreground">No prayers yet.</p>
         )}
       </div>
     </div>

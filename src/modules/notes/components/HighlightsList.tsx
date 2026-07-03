@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 
 type HighlightItem = {
   id: string
@@ -12,26 +11,25 @@ type HighlightItem = {
 }
 
 const COLOR_MAP: Record<string, string> = {
-  yellow: "bg-yellow-100 border-yellow-300",
-  green: "bg-green-100 border-green-300",
-  blue: "bg-blue-100 border-blue-300",
-  pink: "bg-pink-100 border-pink-300",
+  yellow: "border-l-yellow-400 bg-yellow-50",
+  green: "border-l-green-400 bg-green-50",
+  blue: "border-l-blue-400 bg-blue-50",
+  pink: "border-l-pink-400 bg-pink-50",
 }
 
 export function HighlightsList() {
   const [highlights, setHighlights] = useState<HighlightItem[]>([])
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
 
   useEffect(() => {
     fetch("/api/highlights")
       .then((r) => r.json())
       .then(setHighlights)
-      .catch(() => {})
+      .catch(() => console.error("Failed to load highlights"))
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <p className="text-sm text-muted-foreground">Loading highlights...</p>
+  if (loading) return <p className="py-4 text-sm text-muted-foreground animate-fade-in">Loading highlights...</p>
 
   if (highlights.length === 0) return null
 
@@ -41,24 +39,24 @@ export function HighlightsList() {
   }
 
   return (
-    <div className="mt-8">
-      <h2 className="mb-3 text-sm font-semibold">Highlights ({highlights.length})</h2>
+    <div className="mt-10 animate-fade-in">
+      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Highlights ({highlights.length})</h2>
       <div className="space-y-2">
         {highlights.map((h) => (
           <div
             key={h.id}
-            className={`flex items-start justify-between rounded-lg border-l-4 p-3 ${COLOR_MAP[h.color] || "bg-yellow-100 border-yellow-300"}`}
+            className={`flex items-start justify-between rounded-xl border-l-4 bg-card p-4 shadow-sm ${COLOR_MAP[h.color] || "border-l-yellow-400 bg-yellow-50"}`}
           >
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">{h.reference}</p>
-              {h.text && <p className="mt-1 text-xs text-muted-foreground truncate">{h.text}</p>}
+              {h.text && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{h.text}</p>}
             </div>
             <button
               onClick={() => removeHighlight(h.verseId)}
-              className="ml-2 rounded p-1 text-xs text-red-500 hover:bg-red-50"
+              className="ml-2 rounded-lg p-1.5 text-red-400 transition-colors hover:bg-red-50"
               title="Remove highlight"
             >
-              ✕
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
         ))}

@@ -94,14 +94,14 @@ export default function BibleReader({
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl px-4">
       {/* Top bar */}
-      <div className="flex items-center gap-2 px-4 py-3">
+      <div className="flex items-center gap-3 px-4 py-4 bg-card rounded-xl shadow-sm mb-6">
         {books && (
           <select
             value={bookNumber}
             onChange={(e) => navigate(parseInt(e.target.value), 1)}
-            className="w-48 rounded-lg border px-3 py-2 text-sm"
+            className="w-52 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground transition-all cursor-pointer focus:ring-2 focus:ring-secondary/20 focus:border-secondary"
           >
             <optgroup label="Old Testament">
               {books.filter((b) => b.testament === "OT").map((b) => (
@@ -118,12 +118,12 @@ export default function BibleReader({
         <div className="relative">
           <button
             onClick={() => setShowChapterGrid(!showChapterGrid)}
-            className="rounded-lg border px-3 py-2 text-sm"
+            className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground font-medium hover:bg-muted transition-colors"
           >
             Ch. {chapterNumber}
           </button>
           {showChapterGrid && (
-            <div className="absolute right-0 top-full z-10 mt-1 w-[320px] max-w-[90vw] rounded-lg border bg-background p-3 shadow-lg">
+            <div className="absolute right-0 top-full z-10 mt-2 w-[320px] max-w-[90vw] rounded-xl border border-border bg-card p-4 shadow-xl animate-fade-in">
               <ChapterSelector
                 totalChapters={totalChapters}
                 currentChapter={chapterNumber}

@@ -680,10 +680,20 @@ async function seedKnowledgeGraph() {
 // ─── 13. Cross-References ────────────────────────────────
 
 async function seedCrossReferences() {
-  console.log("  🔗 Skipping cross-reference import — data not yet available")
-  // TODO: Import TSK cross-refs from https://github.com/CrossReferences-org/bible-cross-references
-  // Format: TSV with columns: book, chapter, verse, anchor, references
-  // Parse and insert into CrossReference table
+  const xrefCount = await prisma.crossReference.count()
+  if (xrefCount > 0) {
+    console.log(`  🔗 Skipping Gnosis import — ${xrefCount} cross-references already exist`)
+    return
+  }
+
+  console.log("  🔗 Importing Gnosis dataset (cross-references, places, entity→verse links)...")
+  try {
+    const { execSync } = require("child_process")
+    execSync("npx tsx scripts/import-gnosis.ts", { stdio: "inherit" })
+    console.log("  ✅ Gnosis import complete")
+  } catch (e) {
+    console.error("  ⚠️  Gnosis import failed (non-fatal):", (e as Error).message)
+  }
 }
 
 // ─── 14. Original Languages Demo ─────────────────────────
@@ -859,22 +869,6 @@ async function main() {
   await seedBiblicalFigures()
   await seedKnowledgeGraph()
   await seedCrossReferences()
-
-  // Import Gnosis data if cross-references are empty
-  const xrefCount = await prisma.crossReference.count()
-  if (xrefCount === 0) {
-    console.log("  🔗 Importing Gnosis dataset (cross-references, places, entity→verse links)...")
-    try {
-      const { execSync } = require("child_process")
-      execSync("npx tsx scripts/import-gnosis.ts", { stdio: "inherit" })
-      console.log("  ✅ Gnosis import complete")
-    } catch (e) {
-      console.error("  ⚠️  Gnosis import failed (non-fatal):", (e as Error).message)
-    }
-  } else {
-    console.log(`  🔗 Skipping Gnosis import — ${xrefCount} cross-references already exist`)
-  }
-
   await seedOriginalLanguages()
   await seedFeatures()
   await seedDailyVerse(verseIdx)

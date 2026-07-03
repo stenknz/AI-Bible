@@ -23,7 +23,7 @@ async function resolveApiKey(config?: AIProviderConfig): Promise<string> {
   try {
     const global = await prisma.aIModelConfig.findUnique({ where: { taskType: GLOBAL_TASK } })
     if (global?.apiKeyEncrypted) return decryptApiKey(global.apiKeyEncrypted)
-  } catch {}
+  } catch (e) { console.error("resolveApiKey failed:", e) }
   return ""
 }
 
@@ -31,7 +31,7 @@ async function resolveDefaultModel(): Promise<string> {
   try {
     const global = await prisma.aIModelConfig.findUnique({ where: { taskType: GLOBAL_TASK } })
     if (global?.model) return global.model
-  } catch {}
+  } catch (e) { console.error("resolveDefaultModel failed:", e) }
   return "deepseek-v4-flash"
 }
 

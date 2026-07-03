@@ -124,12 +124,12 @@ export default function AIConfigPage() {
   const missingTasks = DEFAULT_TASKS.filter((t) => !existingTypes.has(t.taskType))
 
   return (
-    <div className="max-w-3xl space-y-8">
-      <h2 className="text-lg font-medium">AI Model Configuration</h2>
+    <div className="max-w-3xl space-y-8 animate-fade-in">
+      <h2 className="text-lg font-medium text-foreground">AI Model Configuration</h2>
 
       {/* Global config */}
-      <section className="rounded-lg border p-4">
-        <h3 className="mb-3 text-sm font-semibold">Global Settings</h3>
+      <section className="rounded-xl bg-card p-6 shadow-sm">
+        <h3 className="mb-4 text-sm font-semibold text-foreground">Global Settings</h3>
         <div className="space-y-3">
           <div>
             <label className="text-xs text-muted-foreground">API Key</label>
@@ -139,9 +139,9 @@ export default function AIConfigPage() {
                 value={globalApiKey}
                 onChange={(e) => setGlobalApiKey(e.target.value)}
                 placeholder={globalConfig?.apiKeyEncrypted ? "••••••••" : "Enter your OpenCode Go API key"}
-                className="flex-1 rounded border px-2 py-1 text-sm"
+                className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-secondary/30"
               />
-              <button onClick={() => setShowKey(!showKey)} className="rounded border px-2 text-xs hover:bg-muted">
+              <button onClick={() => setShowKey(!showKey)} className="rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted">
                 {showKey ? "Hide" : "Show"}
               </button>
             </div>
@@ -156,7 +156,7 @@ export default function AIConfigPage() {
             <input
               id="global-model"
               defaultValue={globalConfig?.model || "deepseek-v4-flash"}
-              className="w-full rounded border px-2 py-1 text-sm"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-secondary/30"
             />
             <p className="mt-0.5 text-xs text-muted-foreground">
               Used as fallback when a task doesn&apos;t specify its own model override.
@@ -165,7 +165,7 @@ export default function AIConfigPage() {
           <button
             onClick={saveGlobal}
             disabled={saving}
-            className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary/90 disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save Global Settings"}
           </button>
@@ -174,34 +174,34 @@ export default function AIConfigPage() {
 
       {/* Per-task configs */}
       <section className="space-y-3">
-        <h3 className="text-sm font-semibold">Per-Task Overrides</h3>
+        <h3 className="text-sm font-semibold text-foreground">Per-Task Overrides</h3>
         {taskConfigs.map((config) => (
-          <div key={config.id} className="rounded-lg border p-4 text-sm">
+          <div key={config.id} className="rounded-xl bg-card p-5 shadow-sm text-sm">
             {editing === config.id ? (
               <div className="space-y-2">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-xs text-muted-foreground">Provider</label>
-                    <input id={`provider-${config.taskType}`} defaultValue={config.provider} className="w-full rounded border px-2 py-1" />
+                    <input id={`provider-${config.taskType}`} defaultValue={config.provider} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-secondary/30" />
                   </div>
                   <div>
                     <label className="text-xs text-muted-foreground">Model</label>
-                    <input id={`model-${config.taskType}`} defaultValue={config.model} className="w-full rounded border px-2 py-1" />
+                    <input id={`model-${config.taskType}`} defaultValue={config.model} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-secondary/30" />
                   </div>
                   <div>
                     <label className="text-xs text-muted-foreground">Temperature</label>
-                    <input id={`temp-${config.taskType}`} type="number" step="0.1" defaultValue={config.temperature} className="w-full rounded border px-2 py-1" />
+                    <input id={`temp-${config.taskType}`} type="number" step="0.1" defaultValue={config.temperature} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-secondary/30" />
                   </div>
                   <div>
                     <label className="text-xs text-muted-foreground">Max Tokens</label>
-                    <input id={`tokens-${config.taskType}`} type="number" defaultValue={config.maxTokens} className="w-full rounded border px-2 py-1" />
+                    <input id={`tokens-${config.taskType}`} type="number" defaultValue={config.maxTokens} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-secondary/30" />
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => saveTaskConfig(config)} className="rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-700">
+                  <button onClick={() => saveTaskConfig(config)} className="rounded-lg bg-secondary px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-secondary/90">
                     Save
                   </button>
-                  <button onClick={() => setEditing(null)} className="rounded border px-3 py-1">Cancel</button>
+                  <button onClick={() => setEditing(null)} className="rounded-lg border border-border bg-background px-4 py-1.5 text-sm text-foreground transition-colors hover:bg-muted">Cancel</button>
                 </div>
               </div>
             ) : (
@@ -212,7 +212,7 @@ export default function AIConfigPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`h-2 w-2 rounded-full ${config.isActive ? "bg-green-500" : "bg-red-500"}`} />
-                  <button onClick={() => setEditing(config.id)} className="text-blue-600 hover:underline">Edit</button>
+                  <button onClick={() => setEditing(config.id)} className="text-sm font-medium text-secondary transition-colors hover:text-secondary/80">Edit</button>
                 </div>
               </div>
             )}
@@ -227,7 +227,7 @@ export default function AIConfigPage() {
                 <button
                   key={task.taskType}
                   onClick={() => addTask(task.taskType)}
-                  className="rounded-lg border px-3 py-1 text-xs hover:bg-muted"
+                  className="rounded-full bg-muted px-4 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-white"
                 >
                   Add {TASK_LABELS[task.taskType] || task.taskType}
                 </button>
