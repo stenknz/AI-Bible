@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db"
 import { providerRegistry } from "@/modules/ai/services/provider"
 import { getActiveProvider } from "@/modules/ai/services/router"
 
-export type EmbeddingSourceType = "verse" | "note" | "highlight"
+export type EmbeddingSourceType = "verse" | "note" | "highlight" | "dictionary" | "commentary" | "topic" | "bible_event" | "nation" | "person" | "place" | "timeline"
 
 export type EmbeddingRecord = {
   id: string
