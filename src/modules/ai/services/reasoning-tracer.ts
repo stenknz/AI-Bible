@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db"
 
 export type ReasoningStep = {
   step: number
-  action: "retrieve" | "analyze" | "synthesize" | "cite"
+  action: "retrieve" | "retrieve_rag" | "analyze" | "synthesize" | "cite"
   input: string
   output: string
   sourcesUsed: string[]

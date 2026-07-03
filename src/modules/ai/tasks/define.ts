@@ -11,4 +11,5 @@ export type TaskInput = {
   verseIds?: string[]
   passageText?: string
   context?: string
+  ragContext?: string
 }
