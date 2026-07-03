@@ -1,7 +1,8 @@
 import { BaseImporter } from "./base-importer"
+import { EastonsImporter } from "./sources/eastons"
 
 const SOURCES: Record<string, new () => BaseImporter> = {
-  // Will be populated as importers are written
+  easton: EastonsImporter,
 }
 
 async function main() {
