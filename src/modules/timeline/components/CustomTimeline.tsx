@@ -15,7 +15,7 @@ function formatYear(year: number): string {
 function imageForEvent(event: TimelineEventData, indexInYear: number): string | null {
   if (event.startYear == null) return null
   const prefix = event.startYear < 0 ? `${Math.abs(event.startYear)}BC` : `${event.startYear}AD`
-  const suffix = indexInYear > 0 ? `-${indexInYear + 1}` : ""
+  const suffix = `-${indexInYear + 1}`
   return `/images/timeline/${prefix}${suffix}.jpeg`
 }
 
