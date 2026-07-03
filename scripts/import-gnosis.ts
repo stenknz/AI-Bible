@@ -147,6 +147,33 @@ async function main() {
   }
   console.log(`  Imported ${placeInserted} places`)
 
+  // Slug mapping: Gnosis slug → our person.id
+  const PERSON_SLUG_MAP: Record<string, string> = {
+    "jesus-son-of-joseph": "jesus",
+    "jesus-christ": "jesus",
+    "god": "god",
+    "israel": "israel",
+    "aaron": "aaron",
+    "saul": "saul",
+    "holy-spirit": "holy-spirit",
+  }
+
+  // Ensure key persons exist in DB
+  const MISSING_PERSONS = [
+    { id: "god", name: "God", personType: "divine", description: "The one true God, Creator of heaven and earth" },
+    { id: "israel", name: "Israel", personType: "nation", description: "The nation of Israel, descendants of Jacob" },
+    { id: "aaron", name: "Aaron", personType: "priest", description: "First high priest of Israel, brother of Moses" },
+    { id: "saul", name: "Saul", personType: "king", description: "First king of Israel" },
+    { id: "holy-spirit", name: "Holy Spirit", personType: "divine", description: "The third person of the Trinity" },
+  ]
+  for (const p of MISSING_PERSONS) {
+    await prisma.person.upsert({
+      where: { id: p.id },
+      update: {},
+      create: { id: p.id, name: p.name, personType: p.personType, description: p.description },
+    })
+  }
+
   // Import person→verse links into EntityRelation
   console.log("Importing person→verse links...")
   const pvRows = db.exec(`
@@ -155,7 +182,6 @@ async function main() {
     JOIN person p ON p.id = pv.person_id
   `)
   const pvCols = pvRows[0]?.columns || []
-  const pvPersonId = pvCols.indexOf("person_id")
   const pvVerseId = pvCols.indexOf("verse_id")
   const pvSlug = pvCols.indexOf("slug")
   const allPV = pvRows[0]?.values || []
@@ -163,7 +189,8 @@ async function main() {
   let personLinks = 0
   let personSkipped = 0
   for (const row of allPV) {
-    const slug = row[pvSlug] as string
+    const gnosisSlug = row[pvSlug] as string
+    const dbSlug = PERSON_SLUG_MAP[gnosisSlug] || gnosisSlug
     const gnosisVerseId = row[pvVerseId] as number
     const osisRef = gnosisVerses.get(gnosisVerseId)
     if (!osisRef) { personSkipped++; continue }
@@ -171,12 +198,12 @@ async function main() {
     if (!ref) { personSkipped++; continue }
     const verseId = osisToVerseId.get(osisKey(ref))
     if (!verseId) { personSkipped++; continue }
-    const existingPerson = await prisma.person.findUnique({ where: { id: slug } })
+    const existingPerson = await prisma.person.findUnique({ where: { id: dbSlug } })
     if (!existingPerson) { personSkipped++; continue }
     try {
       await prisma.entityRelation.create({
         data: {
-          subjectId: slug,
+          subjectId: dbSlug,
           subjectType: "person",
           predicate: "mentioned_in",
           objectId: verseId,
