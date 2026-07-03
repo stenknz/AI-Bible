@@ -3,14 +3,24 @@ import { BaseImporter, downloadJSONL, parseJSONL } from "../base-importer"
 import type { NormalizedEntry, ImportStats, ValidationError } from "../types"
 import { generateSlug } from "../validate-source"
 
-const NAVES_URL = "https://huggingface.co/datasets/OpenChristianDataOrg/open-christian-data/resolve/main/data/topical_reference/naves/naves-topical-bible.jsonl"
+const NAVES_URL = "https://huggingface.co/datasets/OpenChristianDataOrg/open-christian-data/resolve/main/data/topical_reference.jsonl"
+
+type NaveReference = {
+  raw: string
+  osis: string[]
+}
+
+type NaveSubTopic = {
+  label: string
+  references: NaveReference[]
+}
 
 type NaveRaw = {
+  _source_id: string
   topic: string
-  description?: string
-  related_topics?: string[]
-  sub_topics?: string[]
-  scripture_refs?: string[]
+  alt_topics: string[]
+  subtopics: NaveSubTopic[]
+  related_topics: string[]
 }
 
 export class NavesImporter extends BaseImporter {
@@ -20,20 +30,33 @@ export class NavesImporter extends BaseImporter {
   async load(): Promise<NormalizedEntry[]> {
     const lines = await downloadJSONL(NAVES_URL)
     const raw = parseJSONL<NaveRaw>(lines)
-    return raw.map((entry) => ({
-      source: this.source,
-      title: entry.topic,
-      slug: generateSlug(entry.topic),
-      content: entry.description || entry.topic,
-      summary: entry.description?.slice(0, 200),
-      category: "topic",
-      scriptureRefs: entry.scripture_refs || [],
-      keywords: [entry.topic.toLowerCase(), ...(entry.related_topics || []).map((r: string) => r.toLowerCase())],
-      metadata: {
-        relatedTopics: entry.related_topics || [],
-        subTopics: entry.sub_topics || [],
-      } as Record<string, unknown>,
-    }))
+    return raw
+      .filter((e) => e._source_id === "naves-topical-bible")
+      .filter((e): e is NaveRaw => !!e.topic)
+      .map((entry) => {
+        const contentParts = entry.subtopics.map(
+          (st) => `${st.label}: ${st.references.map((r) => r.raw).join(", ")}`
+        )
+        const content = contentParts.join("\n")
+        const scriptureRefs = entry.subtopics.flatMap((st) =>
+          st.references.flatMap((r) => r.osis.filter(Boolean))
+        )
+        return {
+          source: this.source,
+          title: entry.topic,
+          slug: generateSlug(entry.topic),
+          content,
+          summary: content.slice(0, 200),
+          category: "topic",
+          scriptureRefs,
+          keywords: [entry.topic.toLowerCase(), ...entry.related_topics.map((r: string) => r.toLowerCase())],
+          metadata: {
+            relatedTopics: entry.related_topics || [],
+            subTopics: entry.subtopics.map((st) => st.label),
+            altTopics: entry.alt_topics || [],
+          } as Record<string, unknown>,
+        }
+      })
   }
 
   validate(entries: NormalizedEntry[]): ValidationError[] {

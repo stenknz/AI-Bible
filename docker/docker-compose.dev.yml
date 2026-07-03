@@ -28,6 +28,7 @@ services:
       - ../src:/app/src
       - ../public:/app/public
       - ../prisma:/app/prisma
+      - ../scripts:/app/scripts
       - ../kjv.txt:/app/kjv.txt
       - ../postcss.config.js:/app/postcss.config.js
       - ../next.config.ts:/app/next.config.ts

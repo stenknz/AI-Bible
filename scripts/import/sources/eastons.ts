@@ -6,9 +6,8 @@ import { generateSlug } from "../validate-source"
 const EASTONS_URL = "https://huggingface.co/datasets/JWBickel/BibleDictionaries/resolve/main/Easton%27s%20Bible%20Dictionary.jsonl"
 
 type EastonRaw = {
-  word: string
-  definition: string
-  scripture_refs?: string[]
+  term: string
+  definitions: string[]
 }
 
 export class EastonsImporter extends BaseImporter {
@@ -18,16 +17,16 @@ export class EastonsImporter extends BaseImporter {
   async load(): Promise<NormalizedEntry[]> {
     const lines = await downloadJSONL(EASTONS_URL)
     const raw = parseJSONL<EastonRaw>(lines)
-    return raw.map((entry) => ({
+    return raw.filter((e): e is EastonRaw => !!e.term).map((entry) => ({
       source: this.source,
-      title: entry.word,
-      slug: generateSlug(entry.word),
-      content: entry.definition,
-      summary: entry.definition.slice(0, 200),
+      title: entry.term,
+      slug: generateSlug(entry.term),
+      content: entry.definitions.join("\n\n"),
+      summary: entry.definitions.join("\n\n").slice(0, 200),
       aliases: [],
       category: "term",
-      scriptureRefs: entry.scripture_refs || [],
-      keywords: [entry.word.toLowerCase()],
+      scriptureRefs: [],
+      keywords: [entry.term.toLowerCase()],
     }))
   }
 

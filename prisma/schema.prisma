@@ -588,7 +588,6 @@ model DictionaryEntry {
   updatedAt     DateTime @updatedAt
 
   @@index([source])
-  @@index([slug])
   @@index([category])
 }
 
@@ -611,7 +610,6 @@ model CommentaryEntry {
 
   @@index([source])
   @@index([verseId])
-  @@index([slug])
 }
 
 model TopicEntry {
@@ -629,7 +627,6 @@ model TopicEntry {
   updatedAt     DateTime @updatedAt
 
   @@index([topic])
-  @@index([slug])
 }
 
 model BibleEvent {
@@ -648,7 +645,6 @@ model BibleEvent {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  @@index([slug])
   @@index([category])
 }
 
@@ -665,9 +661,7 @@ model Nation {
   timePeriod     String?
   metadata       Json?
   createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  @@index([slug])
+  updatedAt     DateTime @updatedAt
 }
 
 model Media {

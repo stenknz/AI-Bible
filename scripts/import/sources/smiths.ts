@@ -6,9 +6,8 @@ import { generateSlug } from "../validate-source"
 const SMITHS_URL = "https://huggingface.co/datasets/JWBickel/BibleDictionaries/resolve/main/Smith%27s%20Bible%20Dictionary.jsonl"
 
 type SmithRaw = {
-  word: string
-  definition: string
-  scripture_refs?: string[]
+  term: string
+  definitions: string[]
 }
 
 export class SmithsImporter extends BaseImporter {
@@ -18,16 +17,16 @@ export class SmithsImporter extends BaseImporter {
   async load(): Promise<NormalizedEntry[]> {
     const lines = await downloadJSONL(SMITHS_URL)
     const raw = parseJSONL<SmithRaw>(lines)
-    return raw.map((entry) => ({
+    return raw.filter((e): e is SmithRaw => !!e.term).map((entry) => ({
       source: this.source,
-      title: entry.word,
-      slug: generateSlug(entry.word),
-      content: entry.definition,
-      summary: entry.definition.slice(0, 200),
+      title: entry.term,
+      slug: generateSlug(entry.term),
+      content: entry.definitions.join("\n\n"),
+      summary: entry.definitions.join("\n\n").slice(0, 200),
       aliases: [],
       category: "term",
-      scriptureRefs: entry.scripture_refs || [],
-      keywords: [entry.word.toLowerCase()],
+      scriptureRefs: [],
+      keywords: [entry.term.toLowerCase()],
     }))
   }
 

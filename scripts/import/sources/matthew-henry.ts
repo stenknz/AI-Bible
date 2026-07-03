@@ -3,17 +3,18 @@ import { BaseImporter, downloadJSONL, parseJSONL } from "../base-importer"
 import type { NormalizedEntry, ImportStats, ValidationError } from "../types"
 import { generateSlug } from "../validate-source"
 
-const MH_URL = "https://huggingface.co/datasets/OpenChristianDataOrg/open-christian-data/resolve/main/data/commentary/matthew-henry/matthew-henry-complete.jsonl"
+const MH_URL = "https://huggingface.co/datasets/OpenChristianDataOrg/open-christian-data/resolve/main/data/commentary.jsonl"
 
 type MHRaw = {
+  _source_id: string
   entry_id: string
   book: string
   chapter: number
   verse_range: string
-  verse_range_osis: string
+  verse_range_osis?: string | null
   commentary_text: string
-  summary?: string
-  word_count?: number
+  summary?: string | null
+  word_count?: number | null
 }
 
 export class MatthewHenryImporter extends BaseImporter {
@@ -23,14 +24,17 @@ export class MatthewHenryImporter extends BaseImporter {
   async load(): Promise<NormalizedEntry[]> {
     const lines = await downloadJSONL(MH_URL)
     const raw = parseJSONL<MHRaw>(lines)
-    return raw.map((entry) => ({
+    return raw
+      .filter((e) => e._source_id === "matthew-henry-complete")
+      .filter((e): e is MHRaw => !!e.commentary_text)
+      .map((entry) => ({
       source: this.source,
       title: `${entry.book} ${entry.chapter}:${entry.verse_range}`,
       slug: generateSlug(`${entry.book}-${entry.chapter}-${entry.verse_range}`),
       content: entry.commentary_text,
       summary: entry.summary || entry.commentary_text.slice(0, 200),
       category: "commentary",
-      scriptureRefs: [entry.verse_range_osis],
+      scriptureRefs: entry.verse_range_osis ? [entry.verse_range_osis] : [],
       keywords: [entry.book.toLowerCase(), entry.verse_range],
       metadata: {
         book: entry.book,

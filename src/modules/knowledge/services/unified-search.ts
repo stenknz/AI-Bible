@@ -8,23 +8,28 @@ export async function unifiedSearch(
   const q = query.toLowerCase()
   const results: KnowledgeSearchResult[] = []
 
-  const searchable: { type: KnowledgeEntityType; model: any; searchFields: string[]; titleField: string; textField: string }[] = [
-    { type: "verse", model: prisma.verse, searchFields: ["text"], titleField: "id", textField: "text" },
-    { type: "dictionary", model: prisma.dictionaryEntry, searchFields: ["title", "content", "aliases"], titleField: "title", textField: "content" },
-    { type: "commentary", model: prisma.commentaryEntry, searchFields: ["title", "content"], titleField: "title", textField: "content" },
-    { type: "topic", model: prisma.topicEntry, searchFields: ["topic", "description"], titleField: "topic", textField: "description" },
-    { type: "bible_event", model: prisma.bibleEvent, searchFields: ["name", "description"], titleField: "name", textField: "description" },
-    { type: "nation", model: prisma.nation, searchFields: ["name", "alternateNames", "description"], titleField: "name", textField: "description" },
-    { type: "person", model: prisma.person, searchFields: ["name", "alternateNames", "description"], titleField: "name", textField: "description" },
-    { type: "place", model: prisma.place, searchFields: ["name", "description"], titleField: "name", textField: "description" },
+  const searchable: { type: KnowledgeEntityType; model: any; strFields: string[]; arrFields: string[]; titleField: string; textField: string }[] = [
+    { type: "verse", model: prisma.verse, strFields: ["text"], arrFields: [], titleField: "id", textField: "text" },
+    { type: "dictionary", model: prisma.dictionaryEntry, strFields: ["title", "content"], arrFields: ["aliases"], titleField: "title", textField: "content" },
+    { type: "commentary", model: prisma.commentaryEntry, strFields: ["title", "content"], arrFields: [], titleField: "title", textField: "content" },
+    { type: "topic", model: prisma.topicEntry, strFields: ["topic", "description"], arrFields: [], titleField: "topic", textField: "description" },
+    { type: "bible_event", model: prisma.bibleEvent, strFields: ["name", "description"], arrFields: [], titleField: "name", textField: "description" },
+    { type: "nation", model: prisma.nation, strFields: ["name", "description"], arrFields: ["alternateNames"], titleField: "name", textField: "description" },
+    { type: "person", model: prisma.person, strFields: ["name", "description"], arrFields: ["alternateNames"], titleField: "name", textField: "description" },
+    { type: "place", model: prisma.place, strFields: ["name", "description"], arrFields: [], titleField: "name", textField: "description" },
   ]
 
   const filtered = types ? searchable.filter((s) => types.includes(s.type)) : searchable
 
   for (const entity of filtered) {
-    const orConditions = entity.searchFields.map((field) => ({
-      [field]: { contains: q, mode: "insensitive" as const },
-    }))
+    const orConditions: any[] = [
+      ...entity.strFields.map((field) => ({
+        [field]: { contains: q, mode: "insensitive" as const },
+      })),
+      ...entity.arrFields.map((field) => ({
+        [field]: { has: q },
+      })),
+    ]
 
     const records = await entity.model.findMany({
       where: { OR: orConditions },
