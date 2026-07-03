@@ -27,8 +27,9 @@ export function validateXML(xml: string): ValidationError[] {
 }
 
 export function generateSlug(title: string): string {
-  return title
+  const slug = title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
+  return slug || "untitled"
 }

@@ -1,11 +1,11 @@
-import type { ImportOptions, ImportStats, NormalizedEntry } from "./types"
+import type { ImportOptions, ImportStats, NormalizedEntry, ValidationError } from "./types"
 
 export abstract class BaseImporter {
   abstract readonly source: string
   abstract readonly version: string
 
-  abstract load(input: string): Promise<NormalizedEntry[]>
-  abstract validate(entries: NormalizedEntry[]): string[]
+  abstract load(): Promise<NormalizedEntry[]>
+  abstract validate(entries: NormalizedEntry[]): ValidationError[]
   abstract persist(entries: NormalizedEntry[]): Promise<ImportStats>
 
   async run(options: ImportOptions): Promise<ImportStats> {
@@ -13,7 +13,7 @@ export abstract class BaseImporter {
     const stats: ImportStats = { total: 0, inserted: 0, updated: 0, skipped: 0, errors: 0, duration: 0 }
 
     console.log(`[${this.source}] Loading...`)
-    const entries = await this.load(options.source)
+    const entries = await this.load()
     stats.total = entries.length
     console.log(`[${this.source}] Loaded ${entries.length} entries`)
     options.onProgress?.(stats)
@@ -22,7 +22,7 @@ export abstract class BaseImporter {
     if (validationErrors.length > 0) {
       console.error(`[${this.source}] ${validationErrors.length} validation errors`)
       for (const err of validationErrors.slice(0, 10)) {
-        console.error(`  ${err}`)
+        console.error(`  ${err.field}: ${err.message}`)
       }
       stats.errors = validationErrors.length
     }

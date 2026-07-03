@@ -6,11 +6,13 @@ const SOURCES: Record<string, new () => BaseImporter> = {
 
 async function main() {
   const args = process.argv.slice(2)
-  const sourceFlag = args.find((a) => a.startsWith("--source="))
-  const sourceName = sourceFlag?.split("=")[1]
+  const sourceArg = args.find((a) => a.startsWith("--source="))
+  const fileArg = args.find((a) => a.startsWith("--file="))
+  const sourceName = sourceArg ? sourceArg.slice("--source=".length) : ""
+  const filePath = fileArg ? fileArg.slice("--file=".length) : ""
 
   if (!sourceName || !SOURCES[sourceName]) {
-    console.log("Usage: npx tsx scripts/import/import-runner.ts --source=<name>")
+    console.log("Usage: npx tsx scripts/import/import-runner.ts --source=<name> [--file=<path>]")
     console.log("Available sources:", Object.keys(SOURCES).join(", "))
     process.exit(1)
   }
@@ -21,7 +23,7 @@ async function main() {
   console.log(`Starting import: ${importer.source} v${importer.version}`)
 
   const stats = await importer.run({
-    source: importer.source,
+    source: sourceName,
     version: importer.version,
     batchSize: 100,
   })
