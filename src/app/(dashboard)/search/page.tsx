@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
+import KnowledgeSearchResults from "@/modules/knowledge/components/KnowledgeSearchResults"
 
-type SearchResult = {
+type LegacySearchResult = {
   id: string
   type: "verse" | "note" | "highlight"
   text: string
@@ -11,20 +12,26 @@ type SearchResult = {
 
 export default function SearchPage() {
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<SearchResult[]>([])
+  const [legacyResults, setLegacyResults] = useState<LegacySearchResult[]>([])
+  const [knowledgeResults, setKnowledgeResults] = useState<Record<string, any[]>>({})
   const [loading, setLoading] = useState(false)
+  const [searched, setSearched] = useState(false)
 
-  async function handleSearch(e: React.FormEvent) {
+  const handleSearch = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!query.trim()) return
     setLoading(true)
-    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
-    if (res.ok) {
-      const data = await res.json()
-      setResults(data)
-    }
+    setSearched(true)
+
+    const [legacyRes, knowledgeRes] = await Promise.all([
+      fetch(`/api/search?q=${encodeURIComponent(query)}`).then((r) => r.json()).catch(() => []),
+      fetch(`/api/knowledge/search?q=${encodeURIComponent(query)}`).then((r) => r.json()).catch(() => ({ results: {} })),
+    ])
+
+    setLegacyResults(legacyRes || [])
+    setKnowledgeResults(knowledgeRes.results || {})
     setLoading(false)
-  }
+  }, [query])
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 animate-fade-in">
@@ -37,7 +44,7 @@ export default function SearchPage() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search Bible, notes..."
+            placeholder="Search Bible, dictionaries, commentaries, topics..."
             className="w-full rounded-xl border border-border bg-card px-12 py-4 text-lg text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
             autoFocus
           />
@@ -53,40 +60,33 @@ export default function SearchPage() {
         </div>
       )}
 
-      <div className="space-y-4">
-        {results.map((r, i) => (
-          <div key={`${r.type}-${r.id}-${i}`} className="rounded-xl bg-card p-6 shadow-sm animate-slide-up">
-            <div className="mb-2 flex items-center gap-2">
-              <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
-                r.type === "verse" ? "bg-secondary/10 text-secondary" :
-                r.type === "note" ? "bg-primary/10 text-primary" :
-                "bg-muted text-muted-foreground"
-              }`}>
-                {r.type === "verse" && (
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                )}
-                {r.type === "note" && (
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                )}
-                {r.type === "highlight" && (
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                  </svg>
-                )}
-                {r.type.charAt(0).toUpperCase() + r.type.slice(1)}
-              </span>
-              {r.reference && <span className="text-xs text-muted-foreground">{r.reference}</span>}
-            </div>
-            <p className="text-sm leading-relaxed text-foreground">{r.text}</p>
-          </div>
-        ))}
-      </div>
+      <KnowledgeSearchResults results={knowledgeResults} />
 
-      {!loading && query && results.length === 0 && (
+      {legacyResults.length > 0 && (
+        <div className="mt-8 space-y-4">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            Verses & Notes
+            <span className="ml-2 text-xs font-normal opacity-60">({legacyResults.length})</span>
+          </h3>
+          {legacyResults.map((r, i) => (
+            <div key={`${r.type}-${r.id}-${i}`} className="rounded-xl bg-card p-6 shadow-sm">
+              <div className="mb-2 flex items-center gap-2">
+                <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
+                  r.type === "verse" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" :
+                  r.type === "note" ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300" :
+                  "bg-muted text-muted-foreground"
+                }`}>
+                  {r.type === "verse" ? "Verse" : r.type === "note" ? "Note" : "Highlight"}
+                </span>
+                {r.reference && <span className="text-xs text-muted-foreground">{r.reference}</span>}
+              </div>
+              <p className="text-sm leading-relaxed text-foreground">{r.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && searched && legacyResults.length === 0 && (
         <div className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
           <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
