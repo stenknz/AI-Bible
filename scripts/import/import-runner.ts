@@ -1,9 +1,11 @@
 import { BaseImporter } from "./base-importer"
 import { EastonsImporter } from "./sources/eastons"
+import { NavesImporter } from "./sources/naves"
 import { SmithsImporter } from "./sources/smiths"
 
 const SOURCES: Record<string, new () => BaseImporter> = {
   easton: EastonsImporter,
+  nave: NavesImporter,
   smith: SmithsImporter,
 }
 
