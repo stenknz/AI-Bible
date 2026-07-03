@@ -1,4 +1,4 @@
-export interface ImportOptions {
+export type ImportOptions = {
   source: string
   version: string
   incremental?: boolean
@@ -6,7 +6,7 @@ export interface ImportOptions {
   onProgress?: (stats: ImportStats) => void
 }
 
-export interface ImportStats {
+export type ImportStats = {
   total: number
   inserted: number
   updated: number
@@ -15,7 +15,7 @@ export interface ImportStats {
   duration: number
 }
 
-export interface NormalizedEntry {
+export type NormalizedEntry = {
   source: string
   title: string
   slug: string
@@ -31,7 +31,7 @@ export interface NormalizedEntry {
   verseEndId?: string
 }
 
-export interface ValidationError {
+export type ValidationError = {
   line?: number
   field: string
   message: string

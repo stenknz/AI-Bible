@@ -37,7 +37,7 @@ export interface EntityDetail<T = unknown> {
 export interface EntityRelation {
   predicate: string
   subjectId: string
-  subjectType: string
+  subjectType: KnowledgeEntityType
   objectId: string
-  objectType: string
+  objectType: KnowledgeEntityType
 }
