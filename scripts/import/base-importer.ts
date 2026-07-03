@@ -1,5 +1,24 @@
 import type { ImportOptions, ImportStats, NormalizedEntry, ValidationError } from "./types"
 
+export async function downloadJSONL(url: string): Promise<string[]> {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`Failed to download ${url}: ${response.status}`)
+  const text = await response.text()
+  return text.split("\n").filter(Boolean)
+}
+
+export function parseJSONL<T>(lines: string[]): T[] {
+  const results: T[] = []
+  for (let i = 0; i < lines.length; i++) {
+    try {
+      results.push(JSON.parse(lines[i]))
+    } catch {
+      console.warn(`Skipping invalid JSON at line ${i + 1}`)
+    }
+  }
+  return results
+}
+
 export abstract class BaseImporter {
   abstract readonly source: string
   abstract readonly version: string
