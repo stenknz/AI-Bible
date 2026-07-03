@@ -23,18 +23,27 @@ export const verseExplanationHandler: TaskHandler = {
       context = ctx.scripture
     }
 
+    // Build system prompt with optional RAG context
+    const systemParts: string[] = [
+      "You are a Bible study assistant focused on Christianity and the Bible. " +
+      "If asked about non-Christian topics, politely decline. " +
+      "Always cite verses. Be concise — respond in 2-3 paragraphs max.",
+    ]
+
+    if (input.ragContext) {
+      systemParts.push(
+        "You have access to the following study resources to inform your answer:\n" +
+        input.ragContext +
+        "\n\nWhen using information from these resources, cite them by name (e.g., 'According to Easton's Bible Dictionary...' or 'Matthew Henry comments...')."
+      )
+    }
+
     const prompt = buildVerseExplanationPrompt(input.passageText || input.query, context)
 
     const provider = providerRegistry.get(getActiveProvider())
     const response = await provider.chat(
       [
-        {
-          role: "system",
-          content:
-            "You are a Bible study assistant focused on Christianity and the Bible. " +
-            "If asked about non-Christian topics, politely decline. " +
-            "Always cite verses. Be concise — respond in 2-3 paragraphs max.",
-        },
+        { role: "system", content: systemParts.join("\n\n") },
         { role: "user", content: prompt },
       ],
       { model: route.model, temperature: route.temperature, maxTokens: 3000 } as AIProviderConfig
