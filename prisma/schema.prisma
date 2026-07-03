@@ -569,3 +569,120 @@ model ReasoningTrace {
   tokenUsage  Json?
   createdAt   DateTime @default(now())
 }
+
+// ─── Knowledge Platform — Dictionary ──────────────────────
+
+model DictionaryEntry {
+  id            String   @id @default(cuid())
+  source        String
+  title         String
+  slug          String   @unique
+  content       String
+  summary       String?
+  aliases       String[]
+  category      String?
+  scriptureRefs String[]
+  keywords      String[]
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([source])
+  @@index([slug])
+  @@index([category])
+}
+
+model CommentaryEntry {
+  id            String   @id @default(cuid())
+  source        String
+  title         String
+  slug          String   @unique
+  verseId       String?
+  verseStartId  String?
+  verseEndId    String?
+  content       String
+  summary       String?
+  language      String   @default("en")
+  scriptureRefs String[]
+  keywords      String[]
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([source])
+  @@index([verseId])
+  @@index([slug])
+}
+
+model TopicEntry {
+  id            String   @id @default(cuid())
+  source        String   @default("nave")
+  topic         String
+  slug          String   @unique
+  description   String?
+  scriptureRefs String[]
+  subTopics     String[]
+  relatedTopics String[]
+  keywords      String[]
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([topic])
+  @@index([slug])
+}
+
+model BibleEvent {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  description   String?
+  category      String
+  subCategory   String?
+  scriptureRefs String[]
+  persons       String[]
+  places        String[]
+  eventDate     String?
+  keywords      String[]
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([slug])
+  @@index([category])
+}
+
+model Nation {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  alternateNames String[]
+  description    String?
+  regionId       String?
+  scriptureRefs  String[]
+  kings          String[]
+  capital        String?
+  timePeriod     String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([slug])
+}
+
+model Media {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  url        String
+  type       String
+  caption    String?
+  credit     String?
+  license    String?
+  width      Int?
+  height     Int?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
